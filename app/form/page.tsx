@@ -59,26 +59,26 @@ function CustomSelect({
         type="button"
         id={id}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-4 py-4 border-2 bg-white text-black focus:outline-none transition-colors cursor-pointer text-base text-left flex justify-between items-center ${
+        className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors cursor-pointer text-sm sm:text-base text-left flex justify-between items-center ${
           error
             ? 'border-red-600 focus:border-red-600'
             : 'border-black focus:border-gray-600'
         }`}
       >
-        <span className={value ? 'text-black' : 'text-gray-500'}>
+        <span className={`${value ? 'text-black' : 'text-gray-500'} truncate pr-2`}>
           {selectedLabel}
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="square"
           strokeLinejoin="miter"
-          className={`transition-transform duration-200 ${
+          className={`shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : 'rotate-0'
           }`}
         >
@@ -93,7 +93,7 @@ function CustomSelect({
               <li
                 key={option.value}
                 onClick={() => handleSelect(option.value)}
-                className={`px-4 py-3 cursor-pointer hover:bg-gray-100 text-black text-base ${
+                className={`px-3 py-2.5 sm:px-4 sm:py-3 cursor-pointer hover:bg-gray-100 text-black text-sm sm:text-base ${
                   option.value === value ? 'bg-gray-200 font-medium' : ''
                 }`}
               >
@@ -247,6 +247,13 @@ export default function ProposalForm() {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Scroll to top when status message changes
+  useEffect(() => {
+    if (status.message) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [status.message]);
+
   useEffect(() => {
     // Check authentication
     const checkAuth = async () => {
@@ -335,14 +342,26 @@ export default function ProposalForm() {
       newErrors.event_proposal = 'Please enter an event proposal';
     if (!formData.expected_capacity)
       newErrors.expected_capacity = 'Please enter expected capacity';
-    if (!formData.duration) newErrors.duration = 'Please enter duration';
+    if (!formData.duration) {
+      newErrors.duration = 'Please enter duration';
+    } else {
+      // Validate duration is a valid integer
+      const durationNum = parseInt(formData.duration);
+      if (isNaN(durationNum) || !Number.isInteger(durationNum) || durationNum <= 0) {
+        newErrors.duration = 'Duration must be a valid positive integer';
+      } else if (formData.duration !== durationNum.toString()) {
+        // Check if there are any non-numeric characters
+        newErrors.duration = 'Duration must be a valid positive integer';
+      }
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setStatus({
         type: 'error',
-        message: 'Please fill in all required fields',
+        message: 'Please fill in all the required fields correctly.',
       });
+      // Scroll to top will be triggered by the useEffect
       return;
     }
 
@@ -355,7 +374,7 @@ export default function ProposalForm() {
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
 
-      const response = await fetch('http://localhost:8080/api/proposals', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposals`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,6 +383,7 @@ export default function ProposalForm() {
         body: JSON.stringify({
           ...formData,
           expected_capacity: parseInt(formData.expected_capacity),
+          duration: parseInt(formData.duration),
         }),
       });
 
@@ -417,19 +437,19 @@ export default function ProposalForm() {
       
       <UserBar email={user?.email || ''} onSignOut={handleSignOut} />
 
-      <main className="flex-1 px-4 sm:px-8 py-8 sm:py-12">
+      <main className="flex-1 px-3 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Status Message */}
             {status.message && (
               <div
-                className={`p-4 border-2 ${
+                className={`p-3 sm:p-4 border-2 ${
                   status.type === 'success'
                     ? 'bg-green-50 border-green-600 text-green-800'
                     : 'bg-red-50 border-red-600 text-red-800'
                 }`}
               >
-                <p className="font-medium">{status.message}</p>
+                <p className="font-medium text-sm sm:text-base">{status.message}</p>
               </div>
             )}
 
@@ -437,7 +457,7 @@ export default function ProposalForm() {
             <div>
               <label
                 htmlFor="cc_name"
-                className="block text-sm font-bold mb-2 text-black uppercase tracking-wider"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
               >
                 Name of Club/Chapter *
               </label>
@@ -450,7 +470,7 @@ export default function ProposalForm() {
                 error={errors.cc_name}
               />
               {errors.cc_name && (
-                <p className="text-red-600 text-sm mt-1 font-medium">
+                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                   {errors.cc_name}
                 </p>
               )}
@@ -460,7 +480,7 @@ export default function ProposalForm() {
             <div>
               <label
                 htmlFor="type"
-                className="block text-sm font-bold mb-2 text-black uppercase tracking-wider"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
               >
                 Event Type *
               </label>
@@ -473,7 +493,7 @@ export default function ProposalForm() {
                 error={errors.type}
               />
               {errors.type && (
-                <p className="text-red-600 text-sm mt-1 font-medium">
+                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                   {errors.type}
                 </p>
               )}
@@ -483,7 +503,7 @@ export default function ProposalForm() {
             <div>
               <label
                 htmlFor="event_title"
-                className="block text-sm font-bold mb-2 text-black uppercase tracking-wider"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
               >
                 Event Title *
               </label>
@@ -493,7 +513,7 @@ export default function ProposalForm() {
                 name="event_title"
                 value={formData.event_title}
                 onChange={handleChange}
-                className={`w-full px-4 py-4 border-2 bg-white text-black focus:outline-none transition-colors text-base ${
+                className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
                   errors.event_title
                     ? 'border-red-600 focus:border-red-600'
                     : 'border-black focus:border-gray-600'
@@ -501,7 +521,7 @@ export default function ProposalForm() {
                 placeholder="Enter event title"
               />
               {errors.event_title && (
-                <p className="text-red-600 text-sm mt-1 font-medium">
+                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                   {errors.event_title}
                 </p>
               )}
@@ -511,7 +531,7 @@ export default function ProposalForm() {
             <div>
               <label
                 htmlFor="event_proposal"
-                className="block text-sm font-bold mb-2 text-black uppercase tracking-wider"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
               >
                 Event Proposal *
               </label>
@@ -521,7 +541,7 @@ export default function ProposalForm() {
                 value={formData.event_proposal}
                 onChange={handleChange}
                 rows={8}
-                className={`w-full px-4 py-4 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-base ${
+                className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
                   errors.event_proposal
                     ? 'border-red-600 focus:border-red-600'
                     : 'border-black focus:border-gray-600'
@@ -529,18 +549,18 @@ export default function ProposalForm() {
                 placeholder="Describe your event proposal in detail"
               />
               {errors.event_proposal && (
-                <p className="text-red-600 text-sm mt-1 font-medium">
+                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                   {errors.event_proposal}
                 </p>
               )}
             </div>
 
             {/* Expected Capacity and Duration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label
                   htmlFor="expected_capacity"
-                  className="block text-sm font-bold mb-2 text-black uppercase tracking-wider"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
                 >
                   Expected Capacity *
                 </label>
@@ -551,7 +571,7 @@ export default function ProposalForm() {
                   value={formData.expected_capacity}
                   onChange={handleChange}
                   min="1"
-                  className={`w-full px-4 py-4 border-2 bg-white text-black focus:outline-none transition-colors text-base ${
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
                     errors.expected_capacity
                       ? 'border-red-600 focus:border-red-600'
                       : 'border-black focus:border-gray-600'
@@ -559,7 +579,7 @@ export default function ProposalForm() {
                   placeholder="Number of participants"
                 />
                 {errors.expected_capacity && (
-                  <p className="text-red-600 text-sm mt-1 font-medium">
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                     {errors.expected_capacity}
                   </p>
                 )}
@@ -568,25 +588,27 @@ export default function ProposalForm() {
               <div>
                 <label
                   htmlFor="duration"
-                  className="block text-sm font-bold mb-2 text-black uppercase tracking-wider"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
                 >
-                  Duration *
+                  Duration (hours) *
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   id="duration"
                   name="duration"
                   value={formData.duration}
                   onChange={handleChange}
-                  className={`w-full px-4 py-4 border-2 bg-white text-black focus:outline-none transition-colors text-base ${
+                  min="1"
+                  step="1"
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
                     errors.duration
                       ? 'border-red-600 focus:border-red-600'
                       : 'border-black focus:border-gray-600'
                   }`}
-                  placeholder="Duration of event (in hours)"
+                  placeholder="Enter event duration in hours"
                 />
                 {errors.duration && (
-                  <p className="text-red-600 text-sm mt-1 font-medium">
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                     {errors.duration}
                   </p>
                 )}
@@ -594,11 +616,11 @@ export default function ProposalForm() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4 sm:pt-6">
+            <div className="pt-3 sm:pt-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-black text-white px-8 py-5 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg"
+                className="w-full bg-black text-white px-4 py-3 sm:px-6 sm:py-4 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 {isSubmitting ? 'SUBMITTING...' : 'SUBMIT PROPOSAL'}
               </button>

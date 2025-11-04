@@ -54,20 +54,20 @@ export default function LoginPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
 
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="text-center space-y-6">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+        <div className="text-center space-y-4 sm:space-y-6 w-full max-w-md">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-2 border-red-600 text-red-800 max-w-md mx-auto">
-              <p className="text-sm font-medium">{error}</p>
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border-2 border-red-600 text-red-800">
+              <p className="text-xs sm:text-sm font-medium">{error}</p>
             </div>
           )}
 
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="bg-white text-black px-8 py-4 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 mx-auto"
+            className="w-full bg-white text-black px-4 sm:px-6 py-3 sm:py-4 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3"
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -85,10 +85,10 @@ export default function LoginPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            {loading ? 'SIGNING IN...' : 'SIGN IN WITH GOOGLE'}
+            <span>{loading ? 'SIGNING IN...' : 'SIGN IN WITH GOOGLE'}</span>
           </button>
 
-          <p className="text-xs text-gray-600">
+          <p className="text-[10px] sm:text-xs text-gray-600 px-2">
             Only @vitstudent.ac.in or @vit.ac.in email addresses are allowed
           </p>
         </div>

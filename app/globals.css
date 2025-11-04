@@ -42,9 +42,22 @@ select::-ms-expand {
   display: none;
 }
 
-/* Improve mobile touch targets */
+/* Improve mobile touch targets and prevent zoom */
 @media (max-width: 640px) {
   input, select, textarea, button {
     font-size: 16px !important;
   }
+}
+
+/* Better mobile viewport handling */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Smoother mobile scrolling */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

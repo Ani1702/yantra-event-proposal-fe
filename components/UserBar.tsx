@@ -7,19 +7,20 @@ interface UserBarProps {
 
 export default function UserBar({ email, onSignOut }: UserBarProps) {
   return (
-    <div className="bg-gray-100 px-4 sm:px-8 border-b-2 border-gray-300" style={{ height: '60px' }}>
-      <div className="h-full relative flex items-center">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2">
-          <div className="text-sm">
-            <span className="font-medium">Signed in as:</span>{' '}
-            <span className="font-bold">{email}</span>
+    <div className="bg-gray-100 px-3 sm:px-6 md:px-8 py-2 sm:py-2.5 border-b-2 border-gray-300">
+      <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] sm:text-xs md:text-sm">
+            <span className="font-medium hidden sm:inline">Welcome, </span>
+            <span className="font-medium sm:hidden">Welcome, </span>
+            <span className="font-semibold truncate block sm:inline">{email}</span>
           </div>
         </div>
         
-        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+        <div className="shrink-0">
           <button
             onClick={onSignOut}
-            className="text-sm px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wider"
+            className=" sm:text-[10px] md:text-sm px-1 py-0.5 sm:px-3 sm:py-1.5 border border-black bg-white hover:bg-black hover:text-white transition-colors font-semibold uppercase tracking-wide whitespace-nowrap"
           >
             Sign Out
           </button>
