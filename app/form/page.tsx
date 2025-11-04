@@ -374,7 +374,7 @@ export default function ProposalForm() {
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposals`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
