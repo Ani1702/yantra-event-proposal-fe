@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Yantra Event Proposal - Frontend
+
+A professional, minimalistic Next.js frontend for submitting event proposals to Yantra.
+
+## Features
+
+- Clean, sharp-edged design with no rounded corners
+- Professional black and white theme
+- Form validation for all required fields
+- Real-time submission feedback
+- Responsive design
+- Connected to Express/Prisma backend API
 
 ## Getting Started
 
-First, run the development server:
-
+1. **Install dependencies:**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Ensure backend is running:**
+Make sure the backend server is running on `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Run the development server:**
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Open your browser:**
+Navigate to [http://localhost:3001](http://localhost:3001) (or the port shown in terminal)
 
-## Learn More
+## Form Fields
 
-To learn more about Next.js, take a look at the following resources:
+- **Computer Club Name** - Name of the organizing club
+- **Event Type** - Choose from:
+  - Technical Competition (`tech_comp`)
+  - Hackathon (`hackathon`)
+  - Workshop (`workshop`)
+  - Tech Talk (`tech_talk`)
+- **Event Title** - Title of the event
+- **Event Proposal** - Detailed description of the event
+- **Expected Capacity** - Number of expected participants (must be positive number)
+- **Duration** - How long the event will run (e.g., "2 hours", "1 day")
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Integration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The form submits to:
+```
+POST http://localhost:3000/api/proposals
+```
+
+**Important:** Make sure your backend server is running before submitting the form.
+
+## Design Philosophy
+
+- Sharp, professional aesthetic
+- No rounded corners (fully edged design)
+- Black and white color scheme
+- Bold, uppercase typography
+- Clear visual hierarchy
+- Minimalistic and clean layout
+
+## Tech Stack
+
+- **Next.js 15** - React framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **React Hooks** - State management
+
+## Project Structure
+
+```
+app/
+├── page.tsx          # Main form component
+├── layout.tsx        # Root layout with metadata
+└── globals.css       # Global styles (sharp edges, no rounds)
+```
+
+## Customization
+
+To customize the logo placeholders, replace the content in the header and footer sections of `app/page.tsx`.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
