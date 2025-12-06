@@ -221,19 +221,38 @@ export default function ProposalForm() {
     label: club,
   }));
 
+  // Define venue options
+  const venueOptions = [
+    { value: 'Anna Audi', label: 'Anna Audi' },
+    { value: 'Era Sezhiyan Auditorium (MGB)', label: 'Era Sezhiyan Auditorium (MGB)' },
+    { value: 'CS Hall', label: 'CS Hall' },
+    { value: 'Channa Reddy Auditorium', label: 'Channa Reddy Auditorium' },
+    { value: 'Sarojini Naidu Gallery', label: 'Sarojini Naidu Gallery' },
+    { value: 'Homi Baba Gallery', label: 'Homi Baba Gallery' },
+    { value: 'VOC Gallery', label: 'VOC Gallery' },
+    { value: 'Shakespeare Gallery', label: 'Shakespeare Gallery' },
+    { value: 'Ambedkar Auditorium', label: 'Ambedkar Auditorium' },
+    { value: 'Kamaraj Auditorium', label: 'Kamaraj Auditorium' },
+    { value: 'Rajaji Hall', label: 'Rajaji Hall' },
+    { value: 'MB 210', label: 'MB 210' },
+    { value: 'SMV 209, 210 Conference Halls', label: 'SMV 209, 210 Conference Halls' },
+    { value: 'Bhagat Singh Gallery', label: 'Bhagat Singh Gallery' },
+    { value: 'Smart Classrooms', label: 'Smart Classrooms' },
+    { value: 'Normal Classroom', label: 'Normal Classroom' },
+  ];
+
   // Define event types in the required format
   const eventTypeOptions = [
-    { value: 'competition', label: 'COMPETITION' },
+    { value: 'tech_competition', label: 'TECH COMPETITION' },
     { value: 'hackathon', label: 'HACKATHON' },
     { value: 'workshop', label: 'WORKSHOP' },
-    { value: 'ted_talk', label: 'TED TALK' },
+    { value: 'tech_talk', label: 'TECH TALK' },
   ];
 
   const [formData, setFormData] = useState({
     cc_name: '',
     type: '',
     event_title: '',
-    event_proposal: '',
     expected_capacity: '',
     duration: '',
     event_start_date: '',
@@ -247,6 +266,26 @@ export default function ProposalForm() {
     poc_registration_number: '',
     poc_contact: '',
     collaborating_cc: '',
+    preferred_venue: '',
+    // Tech Competition & Hackathon fields
+    competition_description: '',
+    competition_structure: '',
+    competition_rules: '',
+    judgement_criteria: '',
+    faqs: '',
+    team_size: '',
+    // Workshop fields
+    workshop_description: '',
+    workshop_outcome: '',
+    workshop_type: '',
+    // Tech Talk fields
+    tech_talk_description: '',
+    speaker_name: '',
+    // Eligibility criteria (common for all)
+    eligibility_first_year: false,
+    eligibility_second_year: false,
+    eligibility_third_year: false,
+    eligibility_fourth_year: false,
   });
 
   const [status, setStatus] = useState<{
@@ -349,8 +388,6 @@ export default function ProposalForm() {
     if (!formData.type) newErrors.type = 'Please select an event type';
     if (!formData.event_title)
       newErrors.event_title = 'Please enter an event title';
-    if (!formData.event_proposal)
-      newErrors.event_proposal = 'Please enter an event proposal';
     if (!formData.expected_capacity)
       newErrors.expected_capacity = 'Please enter expected capacity';
     if (!formData.duration) {
@@ -384,8 +421,50 @@ export default function ProposalForm() {
     } else if (!/^\d{10}$/.test(formData.poc_contact)) {
       newErrors.poc_contact = 'Contact number must be 10 digits';
     }
+    if (!formData.preferred_venue)
+      newErrors.preferred_venue = 'Please select a preferred venue';
+
+    // Conditional validation based on event type
+    if (formData.type === 'tech_competition' || formData.type === 'hackathon') {
+      if (!formData.competition_description)
+        newErrors.competition_description = 'Please enter description';
+      if (!formData.competition_structure)
+        newErrors.competition_structure = 'Please enter structure';
+      if (!formData.competition_rules)
+        newErrors.competition_rules = 'Please enter rules';
+      if (!formData.judgement_criteria)
+        newErrors.judgement_criteria = 'Please enter judgement criteria';
+      if (!formData.team_size)
+        newErrors.team_size = 'Please enter team size';
+    }
+
+    if (formData.type === 'workshop') {
+      if (!formData.workshop_description)
+        newErrors.workshop_description = 'Please enter workshop description';
+      if (!formData.workshop_outcome)
+        newErrors.workshop_outcome = 'Please enter expected outcome';
+      if (!formData.workshop_type)
+        newErrors.workshop_type = 'Please select workshop type';
+    }
+
+    if (formData.type === 'tech_talk') {
+      if (!formData.tech_talk_description)
+        newErrors.tech_talk_description = 'Please enter tech talk description';
+      if (!formData.speaker_name)
+        newErrors.speaker_name = 'Please enter speaker name';
+    }
+
+    // Validate at least one eligibility year is selected
+    if (!formData.eligibility_first_year && !formData.eligibility_second_year && 
+        !formData.eligibility_third_year && !formData.eligibility_fourth_year) {
+      newErrors.eligibility = 'Please select at least one eligibility year';
+    }
 
     if (Object.keys(newErrors).length > 0) {
+      console.log('Validation errors found:');
+      console.log('Missing/Invalid fields:', Object.keys(newErrors));
+      console.log('Error details:', newErrors);
+      
       setErrors(newErrors);
       setStatus({
         type: 'error',
@@ -430,7 +509,6 @@ export default function ProposalForm() {
           cc_name: '',
           type: '',
           event_title: '',
-          event_proposal: '',
           expected_capacity: '',
           duration: '',
           event_start_date: '',
@@ -444,6 +522,22 @@ export default function ProposalForm() {
           poc_registration_number: '',
           poc_contact: '',
           collaborating_cc: '',
+          preferred_venue: '',
+          competition_description: '',
+          competition_structure: '',
+          competition_rules: '',
+          judgement_criteria: '',
+          faqs: '',
+          team_size: '',
+          workshop_description: '',
+          workshop_outcome: '',
+          workshop_type: '',
+          tech_talk_description: '',
+          speaker_name: '',
+          eligibility_first_year: false,
+          eligibility_second_year: false,
+          eligibility_third_year: false,
+          eligibility_fourth_year: false,
         });
       } else {
         setStatus({
@@ -566,34 +660,6 @@ export default function ProposalForm() {
               {errors.event_title && (
                 <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
                   {errors.event_title}
-                </p>
-              )}
-            </div>
-
-            {/* Event Proposal */}
-            <div>
-              <label
-                htmlFor="event_proposal"
-                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
-              >
-                Event Proposal *
-              </label>
-              <textarea
-                id="event_proposal"
-                name="event_proposal"
-                value={formData.event_proposal}
-                onChange={handleChange}
-                rows={8}
-                className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
-                  errors.event_proposal
-                    ? 'border-red-600 focus:border-red-600'
-                    : 'border-black focus:border-gray-600'
-                }`}
-                placeholder="Describe your event proposal in detail"
-              />
-              {errors.event_proposal && (
-                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
-                  {errors.event_proposal}
                 </p>
               )}
             </div>
@@ -937,6 +1003,410 @@ export default function ProposalForm() {
                 onChange={(value) => handleSelectChange('collaborating_cc', value)}
                 placeholder="Select collaborating club (if any)"
               />
+            </div>
+
+            {/* Preferred Venue */}
+            <div>
+              <label
+                htmlFor="preferred_venue"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+              >
+                Preferred Venue *
+              </label>
+              <CustomSelect
+                id="preferred_venue"
+                options={venueOptions}
+                value={formData.preferred_venue}
+                onChange={(value) => handleSelectChange('preferred_venue', value)}
+                placeholder="Select preferred venue"
+                error={errors.preferred_venue}
+              />
+              {errors.preferred_venue && (
+                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                  {errors.preferred_venue}
+                </p>
+              )}
+            </div>
+
+            {/* Conditional Fields Based on Event Type */}
+            
+            {/* Tech Competition & Hackathon Fields */}
+            {(formData.type === 'tech_competition' || formData.type === 'hackathon') && (
+              <>
+                <div>
+                  <label
+                    htmlFor="competition_description"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Description *
+                  </label>
+                  <textarea
+                    id="competition_description"
+                    name="competition_description"
+                    value={formData.competition_description}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.competition_description
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Describe the competition/hackathon"
+                  />
+                  {errors.competition_description && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.competition_description}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="competition_structure"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Structure *
+                  </label>
+                  <textarea
+                    id="competition_structure"
+                    name="competition_structure"
+                    value={formData.competition_structure}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.competition_structure
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Explain the event structure (rounds, phases, etc.)"
+                  />
+                  {errors.competition_structure && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.competition_structure}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="competition_rules"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Rules *
+                  </label>
+                  <textarea
+                    id="competition_rules"
+                    name="competition_rules"
+                    value={formData.competition_rules}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.competition_rules
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="List all rules and regulations"
+                  />
+                  {errors.competition_rules && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.competition_rules}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="judgement_criteria"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Judgement Criteria *
+                  </label>
+                  <textarea
+                    id="judgement_criteria"
+                    name="judgement_criteria"
+                    value={formData.judgement_criteria}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.judgement_criteria
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Define how participants will be judged"
+                  />
+                  {errors.judgement_criteria && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.judgement_criteria}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="faqs"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    FAQs
+                  </label>
+                  <textarea
+                    id="faqs"
+                    name="faqs"
+                    value={formData.faqs}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black border-black focus:border-gray-600 focus:outline-none transition-colors resize-none text-sm sm:text-base"
+                    placeholder="Common questions and answers (optional)"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="team_size"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Team Size *
+                  </label>
+                  <input
+                    type="text"
+                    id="team_size"
+                    name="team_size"
+                    value={formData.team_size}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                      errors.team_size
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="e.g., 1-4 members or Individual"
+                  />
+                  {errors.team_size && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.team_size}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Workshop Fields */}
+            {formData.type === 'workshop' && (
+              <>
+                <div>
+                  <label
+                    htmlFor="workshop_description"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Description *
+                  </label>
+                  <textarea
+                    id="workshop_description"
+                    name="workshop_description"
+                    value={formData.workshop_description}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.workshop_description
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Describe the workshop"
+                  />
+                  {errors.workshop_description && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.workshop_description}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="workshop_outcome"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Outcome *
+                  </label>
+                  <textarea
+                    id="workshop_outcome"
+                    name="workshop_outcome"
+                    value={formData.workshop_outcome}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.workshop_outcome
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="What will participants learn or gain?"
+                  />
+                  {errors.workshop_outcome && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.workshop_outcome}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="workshop_type"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Type *
+                  </label>
+                  <CustomSelect
+                    id="workshop_type"
+                    options={[
+                      { value: 'hardware', label: 'HARDWARE' },
+                      { value: 'software', label: 'SOFTWARE' },
+                    ]}
+                    value={formData.workshop_type}
+                    onChange={(value) => handleSelectChange('workshop_type', value)}
+                    placeholder="Select workshop type"
+                    error={errors.workshop_type}
+                  />
+                  {errors.workshop_type && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.workshop_type}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Tech Talk Fields */}
+            {formData.type === 'tech_talk' && (
+              <>
+                <div>
+                  <label
+                    htmlFor="tech_talk_description"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Description *
+                  </label>
+                  <textarea
+                    id="tech_talk_description"
+                    name="tech_talk_description"
+                    value={formData.tech_talk_description}
+                    onChange={handleChange}
+                    rows={4}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.tech_talk_description
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Describe the tech talk"
+                  />
+                  {errors.tech_talk_description && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.tech_talk_description}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="speaker_name"
+                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                  >
+                    Speaker *
+                  </label>
+                  <input
+                    type="text"
+                    id="speaker_name"
+                    name="speaker_name"
+                    value={formData.speaker_name}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                      errors.speaker_name
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Enter speaker name"
+                  />
+                  {errors.speaker_name && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.speaker_name}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Eligibility Criteria - Common for all event types */}
+            <div>
+              <label className="block text-xs sm:text-sm font-bold mb-2 sm:mb-3 text-black uppercase tracking-wide">
+                Eligibility Criteria *
+              </label>
+              <div className="space-y-2 sm:space-y-2.5">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="eligibility_first_year"
+                    name="eligibility_first_year"
+                    checked={formData.eligibility_first_year}
+                    onChange={handleChange}
+                    className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-black cursor-pointer accent-black"
+                  />
+                  <label
+                    htmlFor="eligibility_first_year"
+                    className="text-xs sm:text-sm font-medium text-black cursor-pointer"
+                  >
+                    First Year (I Year)
+                  </label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="eligibility_second_year"
+                    name="eligibility_second_year"
+                    checked={formData.eligibility_second_year}
+                    onChange={handleChange}
+                    className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-black cursor-pointer accent-black"
+                  />
+                  <label
+                    htmlFor="eligibility_second_year"
+                    className="text-xs sm:text-sm font-medium text-black cursor-pointer"
+                  >
+                    Second Year (II Year)
+                  </label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="eligibility_third_year"
+                    name="eligibility_third_year"
+                    checked={formData.eligibility_third_year}
+                    onChange={handleChange}
+                    className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-black cursor-pointer accent-black"
+                  />
+                  <label
+                    htmlFor="eligibility_third_year"
+                    className="text-xs sm:text-sm font-medium text-black cursor-pointer"
+                  >
+                    Third Year (III Year)
+                  </label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="eligibility_fourth_year"
+                    name="eligibility_fourth_year"
+                    checked={formData.eligibility_fourth_year}
+                    onChange={handleChange}
+                    className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-black cursor-pointer accent-black"
+                  />
+                  <label
+                    htmlFor="eligibility_fourth_year"
+                    className="text-xs sm:text-sm font-medium text-black cursor-pointer"
+                  >
+                    Fourth Year (IV Year)
+                  </label>
+                </div>
+              </div>
+              {errors.eligibility && (
+                <p className="text-red-600 text-xs sm:text-sm mt-2 font-medium">
+                  {errors.eligibility}
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
