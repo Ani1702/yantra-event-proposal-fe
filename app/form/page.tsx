@@ -236,6 +236,17 @@ export default function ProposalForm() {
     event_proposal: '',
     expected_capacity: '',
     duration: '',
+    event_start_date: '',
+    event_start_time: '',
+    event_end_date: '',
+    event_end_time: '',
+    expected_sponsorship: '',
+    expected_prize_money: '',
+    is_overnight: false,
+    poc_name: '',
+    poc_registration_number: '',
+    poc_contact: '',
+    collaborating_cc: '',
   });
 
   const [status, setStatus] = useState<{
@@ -298,10 +309,10 @@ export default function ProposalForm() {
       HTMLInputElement | HTMLTextAreaElement
     >
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target as HTMLInputElement;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     });
     // Clear error when user starts typing
     if (errors[name]) {
@@ -354,6 +365,25 @@ export default function ProposalForm() {
         newErrors.duration = 'Duration must be a valid positive integer';
       }
     }
+    if (!formData.event_start_date)
+      newErrors.event_start_date = 'Please enter event start date';
+    if (!formData.event_start_time)
+      newErrors.event_start_time = 'Please enter event start time';
+    if (!formData.event_end_date)
+      newErrors.event_end_date = 'Please enter event end date';
+    if (!formData.event_end_time)
+      newErrors.event_end_time = 'Please enter event end time';
+    if (!formData.expected_sponsorship)
+      newErrors.expected_sponsorship = 'Please enter expected sponsorship amount';
+    if (!formData.poc_name)
+      newErrors.poc_name = 'Please enter POC name';
+    if (!formData.poc_registration_number)
+      newErrors.poc_registration_number = 'Please enter POC registration number';
+    if (!formData.poc_contact) {
+      newErrors.poc_contact = 'Please enter POC contact number';
+    } else if (!/^\d{10}$/.test(formData.poc_contact)) {
+      newErrors.poc_contact = 'Contact number must be 10 digits';
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -384,6 +414,8 @@ export default function ProposalForm() {
           ...formData,
           expected_capacity: parseInt(formData.expected_capacity),
           duration: parseInt(formData.duration),
+          expected_sponsorship: parseInt(formData.expected_sponsorship),
+          expected_prize_money: formData.expected_prize_money ? parseInt(formData.expected_prize_money) : null,
         }),
       });
 
@@ -401,6 +433,17 @@ export default function ProposalForm() {
           event_proposal: '',
           expected_capacity: '',
           duration: '',
+          event_start_date: '',
+          event_start_time: '',
+          event_end_date: '',
+          event_end_time: '',
+          expected_sponsorship: '',
+          expected_prize_money: '',
+          is_overnight: false,
+          poc_name: '',
+          poc_registration_number: '',
+          poc_contact: '',
+          collaborating_cc: '',
         });
       } else {
         setStatus({
@@ -613,6 +656,287 @@ export default function ProposalForm() {
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* Event Start Date and Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label
+                  htmlFor="event_start_date"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Event Start Date *
+                </label>
+                <input
+                  type="date"
+                  id="event_start_date"
+                  name="event_start_date"
+                  value={formData.event_start_date}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.event_start_date
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                />
+                {errors.event_start_date && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.event_start_date}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="event_start_time"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Event Start Time (24h) *
+                </label>
+                <input
+                  type="time"
+                  id="event_start_time"
+                  name="event_start_time"
+                  value={formData.event_start_time}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.event_start_time
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                />
+                {errors.event_start_time && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.event_start_time}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Event End Date and Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label
+                  htmlFor="event_end_date"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Event End Date *
+                </label>
+                <input
+                  type="date"
+                  id="event_end_date"
+                  name="event_end_date"
+                  value={formData.event_end_date}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.event_end_date
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                />
+                {errors.event_end_date && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.event_end_date}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="event_end_time"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Event End Time (24h) *
+                </label>
+                <input
+                  type="time"
+                  id="event_end_time"
+                  name="event_end_time"
+                  value={formData.event_end_time}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.event_end_time
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                />
+                {errors.event_end_time && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.event_end_time}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Expected Sponsorship and Prize Money */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label
+                  htmlFor="expected_sponsorship"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Expected Sponsorship *
+                </label>
+                <input
+                  type="number"
+                  id="expected_sponsorship"
+                  name="expected_sponsorship"
+                  value={formData.expected_sponsorship}
+                  onChange={handleChange}
+                  min="0"
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.expected_sponsorship
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                  placeholder="Amount in ₹"
+                />
+                {errors.expected_sponsorship && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.expected_sponsorship}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="expected_prize_money"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Expected Prize Money
+                </label>
+                <input
+                  type="number"
+                  id="expected_prize_money"
+                  name="expected_prize_money"
+                  value={formData.expected_prize_money}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black border-black focus:border-gray-600 focus:outline-none transition-colors text-sm sm:text-base"
+                  placeholder="Amount in ₹ (if any)"
+                />
+              </div>
+            </div>
+
+            {/* Overnight Event Checkbox */}
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="is_overnight"
+                name="is_overnight"
+                checked={formData.is_overnight}
+                onChange={handleChange}
+                className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-black cursor-pointer accent-black"
+              />
+              <label
+                htmlFor="is_overnight"
+                className="text-xs sm:text-sm font-bold text-black uppercase tracking-wide cursor-pointer"
+              >
+                Is this an overnight event?
+              </label>
+            </div>
+
+            {/* POC Name */}
+            <div>
+              <label
+                htmlFor="poc_name"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+              >
+                Event POC Name *
+              </label>
+              <input
+                type="text"
+                id="poc_name"
+                name="poc_name"
+                value={formData.poc_name}
+                onChange={handleChange}
+                className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                  errors.poc_name
+                    ? 'border-red-600 focus:border-red-600'
+                    : 'border-black focus:border-gray-600'
+                }`}
+                placeholder="Enter POC full name"
+              />
+              {errors.poc_name && (
+                <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                  {errors.poc_name}
+                </p>
+              )}
+            </div>
+
+            {/* POC Registration Number and Contact */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label
+                  htmlFor="poc_registration_number"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  POC Registration Number *
+                </label>
+                <input
+                  type="text"
+                  id="poc_registration_number"
+                  name="poc_registration_number"
+                  value={formData.poc_registration_number}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.poc_registration_number
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                  placeholder="e.g., 21BEC1234"
+                />
+                {errors.poc_registration_number && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.poc_registration_number}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="poc_contact"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  POC Contact Number *
+                </label>
+                <input
+                  type="tel"
+                  id="poc_contact"
+                  name="poc_contact"
+                  value={formData.poc_contact}
+                  onChange={handleChange}
+                  maxLength={10}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
+                    errors.poc_contact
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                  placeholder="10-digit mobile number"
+                />
+                {errors.poc_contact && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.poc_contact}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Collaborating Club/Chapter */}
+            <div>
+              <label
+                htmlFor="collaborating_cc"
+                className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+              >
+                Collaborating Club/Chapter
+              </label>
+              <CustomSelect
+                id="collaborating_cc"
+                options={clubOptions.filter(club => club.value !== formData.cc_name)}
+                value={formData.collaborating_cc}
+                onChange={(value) => handleSelectChange('collaborating_cc', value)}
+                placeholder="Select collaborating club (if any)"
+              />
             </div>
 
             {/* Submit Button */}

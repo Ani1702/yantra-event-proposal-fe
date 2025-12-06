@@ -39,6 +39,7 @@ export default function LoginPage() {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
+            hd: 'vitstudent.ac.in', // Restricts to VIT domain only
           },
         },
       });
