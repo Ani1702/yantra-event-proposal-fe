@@ -82,14 +82,14 @@ export default function ProposalForm() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.user) {
-        router.push('/login');
+        router.push('/');
         return;
       }
 
       const email = session.user.email || '';
       if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vit.ac.in')) {
         await supabase.auth.signOut();
-        router.push('/login');
+        router.push('/');
         return;
       }
 
@@ -102,7 +102,7 @@ export default function ProposalForm() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
-        router.push('/login');
+        router.push('/');
       }
     });
 
@@ -111,7 +111,7 @@ export default function ProposalForm() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push('/');
   };
 
   // Handler for standard <input> and <textarea>

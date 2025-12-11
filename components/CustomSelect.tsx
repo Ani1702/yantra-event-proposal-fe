@@ -9,6 +9,7 @@ interface CustomSelectProps {
   placeholder: string;
   error?: string;
   id: string;
+  disabled?: boolean;
 }
 
 export default function CustomSelect({
@@ -18,6 +19,7 @@ export default function CustomSelect({
   placeholder,
   error,
   id,
+  disabled = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement>(null);
@@ -52,8 +54,13 @@ export default function CustomSelect({
       <button
         type="button"
         id={id}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors cursor-pointer text-sm sm:text-base text-left flex justify-between items-center ${
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 focus:outline-none transition-colors text-sm sm:text-base text-left flex justify-between items-center ${
+          disabled 
+            ? 'bg-gray-100 cursor-not-allowed' 
+            : 'bg-white cursor-pointer'
+        } ${
           error
             ? 'border-red-600 focus:border-red-600'
             : 'border-black focus:border-gray-600'
@@ -80,7 +87,7 @@ export default function CustomSelect({
         </svg>
       </button>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-10 w-full mt-1 bg-white border-2 border-black max-h-60 overflow-y-auto shadow-lg">
           <ul>
             {options.map((option) => (

@@ -8,6 +8,7 @@ interface CustomDatePickerProps {
   placeholder: string;
   error?: string;
   id: string;
+  disabled?: boolean;
 }
 
 export default function CustomDatePicker({
@@ -16,6 +17,7 @@ export default function CustomDatePicker({
   placeholder,
   error,
   id,
+  disabled = false,
 }: CustomDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(1); // February (0-indexed)
@@ -163,8 +165,13 @@ export default function CustomDatePicker({
       <button
         type="button"
         id={id}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors cursor-pointer text-sm sm:text-base text-left flex justify-between items-center ${
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 focus:outline-none transition-colors text-sm sm:text-base text-left flex justify-between items-center ${
+          disabled 
+            ? 'bg-gray-100 cursor-not-allowed' 
+            : 'bg-white cursor-pointer'
+        } ${
           error
             ? 'border-red-600 focus:border-red-600'
             : 'border-black focus:border-gray-600'
@@ -191,7 +198,7 @@ export default function CustomDatePicker({
         </svg>
       </button>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-20 mt-1 bg-white border-2 border-black shadow-lg">
           {renderCalendar()}
         </div>

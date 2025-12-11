@@ -18,9 +18,9 @@ export default function Header() {
         </div>
 
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2">
-          <h1 className="text-[10px] xs:text-xs sm:text-base md:text-xl lg:text-2xl font-bold tracking-wide sm:tracking-wider md:tracking-widest uppercase text-center whitespace-nowrap">
+          {/* <h1 className="text-[10px] xs:text-xs sm:text-base md:text-xl lg:text-2xl font-bold tracking-wide sm:tracking-wider md:tracking-widest uppercase text-center whitespace-nowrap">
             YANTRA EVENT PROPOSAL
-          </h1>
+          </h1> */}
         </div>
 
         <div className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2">

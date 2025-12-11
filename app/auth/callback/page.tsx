@@ -15,7 +15,7 @@ export default function AuthCallback() {
 
         if (error) {
           console.error('Error getting session:', error);
-          router.push('/login?error=auth_failed');
+          router.push('/?error=auth_failed');
           return;
         }
 
@@ -24,19 +24,19 @@ export default function AuthCallback() {
           
           // Check if email is from VIT
           if (email.endsWith('@vitstudent.ac.in') || email.endsWith('@vit.ac.in')) {
-            // Valid VIT email, redirect to form
-            router.push('/form');
+            // Valid VIT email, redirect to root page
+            router.push('/');
           } else {
-            // Not a VIT email, sign out and redirect to login with error
+            // Not a VIT email, sign out and redirect to root with error
             await supabase.auth.signOut();
-            router.push('/login?error=invalid_email');
+            router.push('/?error=invalid_email');
           }
         } else {
-          router.push('/login');
+          router.push('/');
         }
       } catch (error) {
         console.error('Callback error:', error);
-        router.push('/login?error=callback_failed');
+        router.push('/?error=callback_failed');
       }
     };
 
