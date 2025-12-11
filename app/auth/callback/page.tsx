@@ -23,7 +23,7 @@ export default function AuthCallback() {
           const email = session.user.email || '';
           
           // Check if email is from VIT
-          if (email.endsWith('@vitstudent.ac.in') || email.endsWith('@vitstudent')) {
+          if (email.endsWith('@vitstudent.ac.in') || email.endsWith('@vit.ac.in')) {
             // Valid VIT email, redirect to form
             router.push('/form');
           } else {

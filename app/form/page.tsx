@@ -1,253 +1,26 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import UserBar from '@/components/UserBar';
+import CustomSelect from '@/components/CustomSelect';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomTimePicker from '@/components/CustomTimePicker';
 import { supabase } from '@/lib/supabase';
-
-
-interface CustomSelectProps {
-  options: { value: string; label: string }[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  error?: string;
-  id: string; 
-}
-
-function CustomSelect({
-  options,
-  value,
-  onChange,
-  placeholder,
-  error,
-  id,
-}: CustomSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectRef = useRef<HTMLDivElement>(null);
-
-  // Find the label for the currently selected value
-  const selectedLabel =
-    options.find((opt) => opt.value === value)?.label || placeholder;
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        selectRef.current &&
-        !selectRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleSelect = (optionValue: string) => {
-    onChange(optionValue);
-    setIsOpen(false);
-  };
-
-  return (
-    <div className="relative" ref={selectRef}>
-      <button
-        type="button"
-        id={id}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors cursor-pointer text-sm sm:text-base text-left flex justify-between items-center ${
-          error
-            ? 'border-red-600 focus:border-red-600'
-            : 'border-black focus:border-gray-600'
-        }`}
-      >
-        <span className={`${value ? 'text-black' : 'text-gray-500'} truncate pr-2`}>
-          {selectedLabel}
-        </span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="square"
-          strokeLinejoin="miter"
-          className={`shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : 'rotate-0'
-          }`}
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-
-      {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border-2 border-black max-h-60 overflow-y-auto shadow-lg">
-          <ul>
-            {options.map((option) => (
-              <li
-                key={option.value}
-                onClick={() => handleSelect(option.value)}
-                className={`px-3 py-2.5 sm:px-4 sm:py-3 cursor-pointer hover:bg-gray-100 text-black text-sm sm:text-base ${
-                  option.value === value ? 'bg-gray-200 font-medium' : ''
-                }`}
-              >
-                {option.label}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// --- Main Proposal Form Component ---
+import { CLUB_NAMES, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
 
 export default function ProposalForm() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // --- Data for Selects ---
-  const clubNames = [
-    "ADVANCE DEVELOPERS CLUB",
-    "ADVERTISING AND MARKETING CLUB",
-    "ALPHA BIO CELL (ABC)",
-    "ARCHI-TECH",
-    "ASTRONOMY CLUB- VIT STELLAR",
-    "BLOCKCHAIN COMMUNITY VIT",
-    "BULLS AND BEARS CLUB",
-    "CENTRE FOR SOCIAL ENTREPRENEURSHIP DEVELOPMENT(CSED)",
-    "CODECHEF - VIT",
-    "DEVELOPERS STUDENT CLUB (DSC)",
-    "DIGIT SQUAD",
-    "DREAM MERCHANTS",
-    "ENTREPRENEURSHIP CELL (E-CELL)",
-    "ENVIRONMENT & ENERGY PROTECTION CLUB (E2 PC)",
-    "GURUTVA - THE PHYSICS CLUB",
-    "INNOVATION AND CREATION CLUB",
-    "INNOVATOR'S QUEST",
-    "INTERNET OF THINGS COMMUNITY (IOTHINC)",
-    "LINUX USER'S GROUP (LUG)",
-    "MATRIX- THE MULTIMEDIA CLUB",
-    "MOZILLA FIREFOX",
-    "ROBOVITICS",
-    "SOLAI",
-    "STANDARDS CLUB",
-    "STUDENTS ASSOCIATION OF BIO-ENGINEERING SCIENCE AND TECHNOLOGY (SABEST)",
-    "TECHNOLOGY AND GAMING CLUB (TAG)",
-    "THE AI & ML CLUB - TAM",
-    "THE CATALYST CLUB",
-    "THE ELECTRONICS CLUB (TEC)",
-    "VISUAL BLOGGER'S CLUB",
-    "VIT AMATEUR RADIO CLUB (VARC)",
-    "ZERO WASTE MANAGEMENT (ZWM)",
-    "MATH VERSE CLUB",
-    "GEO SPATIAL CLUB",
-    "VINNOVATEIT CLUB",
-    "THE WHITEHATS CLUB",
-    "SOCIETY OF AUTOMOTIVE ENGINEERS (SAE)",
-    "AMERICAN SOCIETY OF MECHANICAL ENGINEERS (ASME)",
-    "INSTITUTION OF INDUSTRIAL AND SYSTEMS ENGINEERS (IISE)",
-    "INTERNATIONAL SOCIETY OF AUTOMATION (ISA)",
-    "SOCIETY OF MANUFACTURING ENGINEERS (SME)",
-    "AMERICAN INSTITUTE OF CHEMICAL ENGINEERS (AICHE)",
-    "TOASTMASTERS INTERNATIONAL",
-    "ASSOCIATION OF ENERGY ENGINEERS (AEE)",
-    "AMERICAN SOCIETY OF CIVIL ENGINEERS (ASCE)",
-    "THE SOCIETY OF PETROLEUM ENGINEERS (SPE)",
-    "STUDENTS FOR THE EXPLORATION AND DEVELOPMENT OF SPACE (SEDS)",
-    "THE SCIENTIFIC RESEARCH SOCIETY (SIGMA XI)",
-    "THE INSTITUTION OF ENGINEERING AND TECHNOLOGY (IET)",
-    "INSTITUTION OF ELECTRONICS AND TELECOMMUNICATION ENGINEERS (IETE)",
-    "SOCIETY FOR INDUSTRIAL AND APPLIED MATHEMATICS (SIAM)",
-    "AMERICAN SOCIETY OF HEATING, REFRIGERATING AND AIR-CONDITIONING ENGINEERS (ASHRAE)",
-    "SOCIETY FOR BIOLOGOCAL ENGINEERING (SBE)",
-    "ASSOCIATION FOR COMPUTING MACHINERY (ACM)",
-    "INDUSTRIAL DESIGN SOCIETY OF AMERICA (IDSA)",
-    "INTERACATION DESIGN ASSOSICATION (IxDA)",
-    "MATERIAL ADVANTAGE STUDENT CHAPTER (ASM)",
-    "INTERNATIOANL ASSOCIATION OF STUDNTS IN ECONOMIC COMMERCIAL SCIENCE(AIESEC)",
-    "INDIAN INSTITUTE OF CHEMICAL ENGINEERS (IICHE)",
-    "INDIAN SOCIETY FOR TECHNICAL EDUCATION (ISTE)",
-    "VIT MATHEMATICAL ASSOCIATION (VITMAS)",
-    "THE BIOTECH RESEARCH SOCIETY INDIA (BRSI)",
-    "INSTITUTION OF ENGINEERS INDIA IE(I)",
-    "THE INSTRUMENT SOCIETY OF INDIA (ISOI)",
-    "SOFT COMPUTING RESEARCH SOCIETY (SCRS)",
-    "INDIAN GEOTECHNICAL SOCIETY",
-    "INDIA SMART GRID FORUM (ISGF)",
-    "COMPUTER SOCIETY OF INDIA (CSI)",
-    "THE INDIAN SOCIETY OF HEATING, REFRIGERATING AND AIR CONDITIONING ENGINEERS (ISHRAE)",
-    "INDIAN SOCIETY OF EARTHQUAKE TECHNOLOGY(ISET)",
-    "ADDITIVE MANUFACTURING SOCIETY OF INDIA (AMSI)",
-    "ASSOCIATION OF DESIGNERS OF INDIA (ADI)",
-    "COMPBIO CELL - RSG INDIA",
-    "SOLAR ENERGY SOCIETY OF INDIA",
-    "INDIAN CONCRETE INSTITUTE",
-    "NATIONAL ASSOCIATION OF STUDENTS OF ARCHITECTURE (NASA)",
-    "INDIAN WATER RESOURCES SOCIETY (IWRS)",
-    "IEEE CIRCUITS AND SYSTEMS (IEEE-CAS)",
-    "IEEE -COMMUNICATIONS SOCIETY (IEEE-COMSOC)",
-    "IEEE COMPUTER SOCIETY (IEEE-CS)",
-    "IEEE ELECTROMAGENETIC COMPATIBILITY SOCIETY (IEEE-EMCS)",
-    "IEEE ELECTRON DEVICES SOCIETY (IEEE -EDS)",
-    "IEEE ENGINEERING IN MEDICINE & BIOLOGY SOCIETY (IEEE-EMBS)",
-    "IEEE INDUSTRIAL APPLICATIONS SOCIETY (IEEE-IAS)",
-    "IEEE INFORMATION THEORY SOCIETY (IEEE-ITS)",
-    "IEEE MICROWAVE THEORY AND TECHNIQUES SOCIETY (IEEE-MTTS)",
-    "IEEE NUCLEAR AND PLASMA SCIENCES AND SOCIETY (IEEE-NPSS)",
-    "IEEE POWER AND ENERGY SOCIETY (IEEE-PES)",
-    "IEEE POWER ELECTRONICS SOCIETY (IEEE - PELS)",
-    "IEEE PRODUCT SAFETY ENGINEERING SOCIETY (IEEE-PSES)",
-    "IEEE PROFESSIONAL COMMUNICATION SOCIETY (IEEE-PCS)",
-    "IEEE ROBOTICS & AUTOMATION SOCIETY (IEEE-RAS)",
-    "IEEE SIGNAL PROCESSING SOCIETY (IEEE-SPS)",
-    "IEEE SOCIETY ON SOCIAL IMPLICATIONS OF TECHNOLOGY (IEEE-SSIT)",
-    "IEEE TECHNOLOGY AND ENGINEERING MANAGEMENT SOCIETY ( IEEE-TEMS)",
-    "IEEE WOMEN IN ENGINEERING (IEEE-WIE)",
-    "INSTITUTE OF ELECTRICAL & ELECTRONICS ENGINEERING (IEEE)"
-  ];
-
   // Map club names to the format required by CustomSelect
-  const clubOptions = clubNames.map((club) => ({
+  const clubOptions = CLUB_NAMES.map((club) => ({
     value: club,
     label: club,
   }));
-
-  // Define venue options
-  const venueOptions = [
-    { value: 'Anna Audi', label: 'Anna Audi' },
-    { value: 'Era Sezhiyan Auditorium (MGB)', label: 'Era Sezhiyan Auditorium (MGB)' },
-    { value: 'CS Hall', label: 'CS Hall' },
-    { value: 'Channa Reddy Auditorium', label: 'Channa Reddy Auditorium' },
-    { value: 'Sarojini Naidu Gallery', label: 'Sarojini Naidu Gallery' },
-    { value: 'Homi Baba Gallery', label: 'Homi Baba Gallery' },
-    { value: 'VOC Gallery', label: 'VOC Gallery' },
-    { value: 'Shakespeare Gallery', label: 'Shakespeare Gallery' },
-    { value: 'Ambedkar Auditorium', label: 'Ambedkar Auditorium' },
-    { value: 'Kamaraj Auditorium', label: 'Kamaraj Auditorium' },
-    { value: 'Rajaji Hall', label: 'Rajaji Hall' },
-    { value: 'MB 210', label: 'MB 210' },
-    { value: 'SMV 209, 210 Conference Halls', label: 'SMV 209, 210 Conference Halls' },
-    { value: 'Bhagat Singh Gallery', label: 'Bhagat Singh Gallery' },
-    { value: 'Smart Classrooms', label: 'Smart Classrooms' },
-    { value: 'Normal Classroom', label: 'Normal Classroom' },
-  ];
-
-  // Define event types in the required format
-  const eventTypeOptions = [
-    { value: 'tech_competition', label: 'TECH COMPETITION' },
-    { value: 'hackathon', label: 'HACKATHON' },
-    { value: 'workshop', label: 'WORKSHOP' },
-    { value: 'tech_talk', label: 'TECH TALK' },
-  ];
 
   const [formData, setFormData] = useState({
     cc_name: '',
@@ -267,19 +40,18 @@ export default function ProposalForm() {
     poc_contact: '',
     collaborating_cc: '',
     preferred_venue: '',
+    // Common field for all event types
+    description: '',
     // Tech Competition & Hackathon fields
-    competition_description: '',
     competition_structure: '',
     competition_rules: '',
     judgement_criteria: '',
     faqs: '',
     team_size: '',
     // Workshop fields
-    workshop_description: '',
     workshop_outcome: '',
     workshop_type: '',
     // Tech Talk fields
-    tech_talk_description: '',
     speaker_name: '',
     // Eligibility criteria (common for all)
     eligibility_first_year: false,
@@ -315,7 +87,7 @@ export default function ProposalForm() {
       }
 
       const email = session.user.email || '';
-      if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vitstudent')) {
+      if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vit.ac.in')) {
         await supabase.auth.signOut();
         router.push('/login');
         return;
@@ -426,21 +198,23 @@ export default function ProposalForm() {
 
     // Conditional validation based on event type
     if (formData.type === 'tech_competition' || formData.type === 'hackathon') {
-      if (!formData.competition_description)
-        newErrors.competition_description = 'Please enter description';
+      if (!formData.description)
+        newErrors.description = 'Please enter description';
       if (!formData.competition_structure)
         newErrors.competition_structure = 'Please enter structure';
       if (!formData.competition_rules)
         newErrors.competition_rules = 'Please enter rules';
       if (!formData.judgement_criteria)
         newErrors.judgement_criteria = 'Please enter judgement criteria';
+      if (!formData.faqs)
+        newErrors.faqs = 'Please enter FAQs';
       if (!formData.team_size)
         newErrors.team_size = 'Please enter team size';
     }
 
     if (formData.type === 'workshop') {
-      if (!formData.workshop_description)
-        newErrors.workshop_description = 'Please enter workshop description';
+      if (!formData.description)
+        newErrors.description = 'Please enter description';
       if (!formData.workshop_outcome)
         newErrors.workshop_outcome = 'Please enter expected outcome';
       if (!formData.workshop_type)
@@ -448,8 +222,8 @@ export default function ProposalForm() {
     }
 
     if (formData.type === 'tech_talk') {
-      if (!formData.tech_talk_description)
-        newErrors.tech_talk_description = 'Please enter tech talk description';
+      if (!formData.description)
+        newErrors.description = 'Please enter description';
       if (!formData.speaker_name)
         newErrors.speaker_name = 'Please enter speaker name';
     }
@@ -458,6 +232,18 @@ export default function ProposalForm() {
     if (!formData.eligibility_first_year && !formData.eligibility_second_year && 
         !formData.eligibility_third_year && !formData.eligibility_fourth_year) {
       newErrors.eligibility = 'Please select at least one eligibility year';
+    }
+
+    // Validate event start date/time is before end date/time
+    if (formData.event_start_date && formData.event_start_time && 
+        formData.event_end_date && formData.event_end_time) {
+      const startDateTime = new Date(`${formData.event_start_date}T${formData.event_start_time}`);
+      const endDateTime = new Date(`${formData.event_end_date}T${formData.event_end_time}`);
+      
+      if (startDateTime >= endDateTime) {
+        newErrors.event_end_date = 'Event end date/time must be after start date/time';
+        newErrors.event_end_time = 'Event end date/time must be after start date/time';
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -523,16 +309,14 @@ export default function ProposalForm() {
           poc_contact: '',
           collaborating_cc: '',
           preferred_venue: '',
-          competition_description: '',
+          description: '',
           competition_structure: '',
           competition_rules: '',
           judgement_criteria: '',
           faqs: '',
           team_size: '',
-          workshop_description: '',
           workshop_outcome: '',
           workshop_type: '',
-          tech_talk_description: '',
           speaker_name: '',
           eligibility_first_year: false,
           eligibility_second_year: false,
@@ -623,7 +407,7 @@ export default function ProposalForm() {
               </label>
               <CustomSelect
                 id="type"
-                options={eventTypeOptions}
+                options={EVENT_TYPE_OPTIONS}
                 value={formData.type}
                 onChange={(value) => handleSelectChange('type', value)}
                 placeholder="Select event type"
@@ -733,17 +517,12 @@ export default function ProposalForm() {
                 >
                   Event Start Date *
                 </label>
-                <input
-                  type="date"
+                <CustomDatePicker
                   id="event_start_date"
-                  name="event_start_date"
                   value={formData.event_start_date}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
-                    errors.event_start_date
-                      ? 'border-red-600 focus:border-red-600'
-                      : 'border-black focus:border-gray-600'
-                  }`}
+                  onChange={(value) => handleSelectChange('event_start_date', value)}
+                  placeholder="Select start date"
+                  error={errors.event_start_date}
                 />
                 {errors.event_start_date && (
                   <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
@@ -759,17 +538,12 @@ export default function ProposalForm() {
                 >
                   Event Start Time (24h) *
                 </label>
-                <input
-                  type="time"
+                <CustomTimePicker
                   id="event_start_time"
-                  name="event_start_time"
                   value={formData.event_start_time}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
-                    errors.event_start_time
-                      ? 'border-red-600 focus:border-red-600'
-                      : 'border-black focus:border-gray-600'
-                  }`}
+                  onChange={(value) => handleSelectChange('event_start_time', value)}
+                  placeholder="Select start time"
+                  error={errors.event_start_time}
                 />
                 {errors.event_start_time && (
                   <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
@@ -788,17 +562,12 @@ export default function ProposalForm() {
                 >
                   Event End Date *
                 </label>
-                <input
-                  type="date"
+                <CustomDatePicker
                   id="event_end_date"
-                  name="event_end_date"
                   value={formData.event_end_date}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
-                    errors.event_end_date
-                      ? 'border-red-600 focus:border-red-600'
-                      : 'border-black focus:border-gray-600'
-                  }`}
+                  onChange={(value) => handleSelectChange('event_end_date', value)}
+                  placeholder="Select end date"
+                  error={errors.event_end_date}
                 />
                 {errors.event_end_date && (
                   <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
@@ -814,17 +583,12 @@ export default function ProposalForm() {
                 >
                   Event End Time (24h) *
                 </label>
-                <input
-                  type="time"
+                <CustomTimePicker
                   id="event_end_time"
-                  name="event_end_time"
                   value={formData.event_end_time}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors text-sm sm:text-base ${
-                    errors.event_end_time
-                      ? 'border-red-600 focus:border-red-600'
-                      : 'border-black focus:border-gray-600'
-                  }`}
+                  onChange={(value) => handleSelectChange('event_end_time', value)}
+                  placeholder="Select end time"
+                  error={errors.event_end_time}
                 />
                 {errors.event_end_time && (
                   <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
@@ -1015,7 +779,7 @@ export default function ProposalForm() {
               </label>
               <CustomSelect
                 id="preferred_venue"
-                options={venueOptions}
+                options={VENUE_OPTIONS}
                 value={formData.preferred_venue}
                 onChange={(value) => handleSelectChange('preferred_venue', value)}
                 placeholder="Select preferred venue"
@@ -1030,35 +794,44 @@ export default function ProposalForm() {
 
             {/* Conditional Fields Based on Event Type */}
             
+            {/* Common Description Field for All Event Types */}
+            {formData.type && (
+              <div>
+                <label
+                  htmlFor="description"
+                  className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
+                >
+                  Description *
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                    errors.description
+                      ? 'border-red-600 focus:border-red-600'
+                      : 'border-black focus:border-gray-600'
+                  }`}
+                  placeholder={
+                    formData.type === 'tech_competition' ? 'Describe the competition' :
+                    formData.type === 'hackathon' ? 'Describe the hackathon' :
+                    formData.type === 'workshop' ? 'Describe the workshop' :
+                    'Describe the tech talk'
+                  }
+                />
+                {errors.description && (
+                  <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                    {errors.description}
+                  </p>
+                )}
+              </div>
+            )}
+            
             {/* Tech Competition & Hackathon Fields */}
             {(formData.type === 'tech_competition' || formData.type === 'hackathon') && (
               <>
-                <div>
-                  <label
-                    htmlFor="competition_description"
-                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
-                  >
-                    Description *
-                  </label>
-                  <textarea
-                    id="competition_description"
-                    name="competition_description"
-                    value={formData.competition_description}
-                    onChange={handleChange}
-                    rows={4}
-                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
-                      errors.competition_description
-                        ? 'border-red-600 focus:border-red-600'
-                        : 'border-black focus:border-gray-600'
-                    }`}
-                    placeholder="Describe the competition/hackathon"
-                  />
-                  {errors.competition_description && (
-                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
-                      {errors.competition_description}
-                    </p>
-                  )}
-                </div>
 
                 <div>
                   <label
@@ -1146,7 +919,7 @@ export default function ProposalForm() {
                     htmlFor="faqs"
                     className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
                   >
-                    FAQs
+                    FAQs *
                   </label>
                   <textarea
                     id="faqs"
@@ -1154,9 +927,18 @@ export default function ProposalForm() {
                     value={formData.faqs}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black border-black focus:border-gray-600 focus:outline-none transition-colors resize-none text-sm sm:text-base"
-                    placeholder="Common questions and answers (optional)"
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
+                      errors.faqs
+                        ? 'border-red-600 focus:border-red-600'
+                        : 'border-black focus:border-gray-600'
+                    }`}
+                    placeholder="Common questions and answers"
                   />
+                  {errors.faqs && (
+                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
+                      {errors.faqs}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -1193,33 +975,6 @@ export default function ProposalForm() {
               <>
                 <div>
                   <label
-                    htmlFor="workshop_description"
-                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
-                  >
-                    Description *
-                  </label>
-                  <textarea
-                    id="workshop_description"
-                    name="workshop_description"
-                    value={formData.workshop_description}
-                    onChange={handleChange}
-                    rows={4}
-                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
-                      errors.workshop_description
-                        ? 'border-red-600 focus:border-red-600'
-                        : 'border-black focus:border-gray-600'
-                    }`}
-                    placeholder="Describe the workshop"
-                  />
-                  {errors.workshop_description && (
-                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
-                      {errors.workshop_description}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
                     htmlFor="workshop_outcome"
                     className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
                   >
@@ -1254,10 +1009,7 @@ export default function ProposalForm() {
                   </label>
                   <CustomSelect
                     id="workshop_type"
-                    options={[
-                      { value: 'hardware', label: 'HARDWARE' },
-                      { value: 'software', label: 'SOFTWARE' },
-                    ]}
+                    options={WORKSHOP_TYPE_OPTIONS}
                     value={formData.workshop_type}
                     onChange={(value) => handleSelectChange('workshop_type', value)}
                     placeholder="Select workshop type"
@@ -1275,33 +1027,6 @@ export default function ProposalForm() {
             {/* Tech Talk Fields */}
             {formData.type === 'tech_talk' && (
               <>
-                <div>
-                  <label
-                    htmlFor="tech_talk_description"
-                    className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
-                  >
-                    Description *
-                  </label>
-                  <textarea
-                    id="tech_talk_description"
-                    name="tech_talk_description"
-                    value={formData.tech_talk_description}
-                    onChange={handleChange}
-                    rows={4}
-                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 bg-white text-black focus:outline-none transition-colors resize-none text-sm sm:text-base ${
-                      errors.tech_talk_description
-                        ? 'border-red-600 focus:border-red-600'
-                        : 'border-black focus:border-gray-600'
-                    }`}
-                    placeholder="Describe the tech talk"
-                  />
-                  {errors.tech_talk_description && (
-                    <p className="text-red-600 text-xs sm:text-sm mt-1 font-medium">
-                      {errors.tech_talk_description}
-                    </p>
-                  )}
-                </div>
-
                 <div>
                   <label
                     htmlFor="speaker_name"
@@ -1398,7 +1123,7 @@ export default function ProposalForm() {
                     htmlFor="eligibility_fourth_year"
                     className="text-xs sm:text-sm font-medium text-black cursor-pointer"
                   >
-                    Fourth Year (IV Year)
+                    Final Year (IV & V Year)
                   </label>
                 </div>
               </div>
