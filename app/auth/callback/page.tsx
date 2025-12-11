@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase, signOutCompletely } from '@/lib/supabase';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function AuthCallback() {
             router.push('/');
           } else {
             // Not a VIT email, sign out and redirect to root with error
-            await supabase.auth.signOut();
+            await signOutCompletely();
             router.push('/?error=invalid_email');
           }
         } else {

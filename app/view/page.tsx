@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import UserBar from '@/components/UserBar';
-import { supabase } from '@/lib/supabase';
+import { supabase, signOutCompletely } from '@/lib/supabase';
 
 interface Proposal {
   id: string;
@@ -63,7 +63,7 @@ export default function ViewSubmissions() {
 
       const email = session.user.email || '';
       if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vit.ac.in')) {
-        await supabase.auth.signOut();
+        await signOutCompletely();
         router.push('/');
         return;
       }
@@ -133,7 +133,7 @@ export default function ViewSubmissions() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutCompletely();
     router.push('/');
   };
 

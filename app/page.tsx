@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import UserBar from '@/components/UserBar';
-import { supabase } from '@/lib/supabase';
+import { supabase, signOutCompletely } from '@/lib/supabase';
 
 export default function Home() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export default function Home() {
           setUser(session.user);
         } else {
           setError('Only VIT email (@vitstudent.ac.in or @vit.ac.in) is allowed');
-          await supabase.auth.signOut();
+          await signOutCompletely();
           setUser(null);
         }
       }
@@ -39,7 +39,7 @@ export default function Home() {
           setUser(session.user);
         } else {
           setError('Only VIT email (@vitstudent.ac.in or @vit.ac.in) is allowed');
-          supabase.auth.signOut();
+          signOutCompletely();
           setUser(null);
         }
       } else {
@@ -76,8 +76,9 @@ export default function Home() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutCompletely();
     setUser(null);
+    router.push('/');
   };
 
   if (loading) {
@@ -101,18 +102,24 @@ export default function Home() {
       <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           {/* Welcome Section with Yantra Logo */}
-          <div className="text-center space-y-4 mb-8">
-            {/* <Image
-              src="/yantra_logo.svg"
+          <div className="text-center mb-10 sm:mb-12">
+           
+            <div className="inline-block">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.2em]  text-gray-900">
+                WELCOME TO <b className='font-extrabold'>YANTRA 2026</b>
+              </h1>
+              <div className="relative">
+                 {/* <Image
+              src="/yantra_logo_black.svg"
               alt="Yantra Logo"
               width={200}
               height={200}
               className="mx-auto w-32 sm:w-40 md:w-48 h-auto"
               priority
             /> */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold uppercase tracking-wider">
-              Welcome to Yantra 2026
-            </h1>
+                {/* <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-black mt-2"></div> */}
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -124,7 +131,7 @@ export default function Home() {
           {/* Action buttons based on authentication status */}
           <div className="flex justify-center mb-8">
             {!user ? (
-              <div className="w-full max-w-md space-y-3">
+              <div className="w-full max-w-xs space-y-3">
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={loading}

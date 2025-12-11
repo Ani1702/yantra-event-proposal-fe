@@ -12,14 +12,14 @@ export default function Header() {
             alt="VIT Logo"
             width={100}
             height={100}
-            className="w-[80px] sm:w-[120px] md:w-[150px] lg:w-[200px] h-auto"
+            className="w-20 sm:w-[120px] md:w-[150px] lg:w-[200px] h-auto"
             priority
           />
         </div>
 
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2">
-          {/* <h1 className="text-[10px] xs:text-xs sm:text-base md:text-xl lg:text-2xl font-bold tracking-wide sm:tracking-wider md:tracking-widest uppercase text-center whitespace-nowrap">
-            YANTRA EVENT PROPOSAL
+          {/* <h1 className="text-[10px] xs:text-xs sm:text-base md:text-xl lg:text-2xl   tracking-wide sm:tracking-wider md:tracking-[0.3em] uppercase text-center whitespace-nowrap">
+            EVENT PROPOSAL
           </h1> */}
         </div>
 
@@ -27,9 +27,9 @@ export default function Header() {
           <Image
             src="/yantra_logo.svg"
             alt="Yantra Logo"
-            width={200}
-            height={200}
-            className="w-[100px] sm:w-[120px] md:w-[100px] lg:w-[250px] h-auto"
+            width={100}
+            height={100}
+            className="w-20 sm:w-[90px] md:w-[100px] lg:w-[200px] h-auto"
             priority
           />
         </div>

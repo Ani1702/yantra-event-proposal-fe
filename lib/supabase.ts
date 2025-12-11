@@ -3,10 +3,52 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  }
+});
 
 // Helper function to check if email is from VIT
 export const isVITEmail = (email: string): boolean => {
   const lowerEmail = email.toLowerCase();
   return lowerEmail.endsWith('@vitstudent.ac.in') || lowerEmail.endsWith('@vit.ac.in');
+};
+
+// Enhanced sign out function that clears all auth-related local storage
+export const signOutCompletely = async () => {
+  try {
+    // Sign out from Supabase
+    await supabase.auth.signOut();
+    
+    // Clear all Supabase auth tokens from localStorage
+    if (typeof window !== 'undefined') {
+      const keysToRemove: string[] = [];
+      
+      // Find all Supabase auth keys
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sb-')) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      // Remove all found keys
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Also clear session storage
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error during sign out:', error);
+    throw error;
+  }
 };

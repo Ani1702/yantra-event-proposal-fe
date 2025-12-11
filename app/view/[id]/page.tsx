@@ -8,7 +8,7 @@ import UserBar from '@/components/UserBar';
 import CustomSelect from '@/components/CustomSelect';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomTimePicker from '@/components/CustomTimePicker';
-import { supabase } from '@/lib/supabase';
+import { supabase, signOutCompletely } from '@/lib/supabase';
 import { CLUB_NAMES, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
 
 export default function EditProposal() {
@@ -86,7 +86,7 @@ export default function EditProposal() {
 
       const email = session.user.email || '';
       if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vit.ac.in')) {
-        await supabase.auth.signOut();
+        await signOutCompletely();
         router.push('/');
         return;
       }
@@ -184,7 +184,7 @@ export default function EditProposal() {
   }, [router, proposalId]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutCompletely();
     router.push('/');
   };
 
