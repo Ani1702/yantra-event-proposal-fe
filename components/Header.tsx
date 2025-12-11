@@ -8,10 +8,10 @@ export default function Header() {
       <div className="relative flex items-center">
         <div className="absolute left-1 sm:left-2 md:left-4 top-1/2 -translate-y-1/2">
           <Image
-            src="/vit.png"
+            src="/vit.svg"
             alt="VIT Logo"
-            width={200}
-            height={200}
+            width={100}
+            height={100}
             className="w-[80px] sm:w-[120px] md:w-[150px] lg:w-[200px] h-auto"
             priority
           />
@@ -25,11 +25,11 @@ export default function Header() {
 
         <div className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2">
           <Image
-            src="/yantra_logo.jpg"
+            src="/yantra_logo.svg"
             alt="Yantra Logo"
-            width={100}
-            height={100}
-            className="w-[50px] sm:w-[70px] md:w-[85px] lg:w-[100px] h-auto"
+            width={200}
+            height={200}
+            className="w-[100px] sm:w-[120px] md:w-[100px] lg:w-[250px] h-auto"
             priority
           />
         </div>

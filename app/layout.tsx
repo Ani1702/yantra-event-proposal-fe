@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Yantra Event Proposal",
   description: "Submit your event proposal for Yantra",
   icons: {
-    icon: "/yantra_logo.jpg",
+    icon: "/yantra_logo.svg",
   },
 };
 
