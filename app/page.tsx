@@ -107,7 +107,13 @@ export default function Home() {
             <div className="inline-block">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.2em]  text-gray-900">
                 WELCOME TO <b className='font-extrabold'>YANTRA 2026</b>
+                
               </h1>
+                 {/* <h1 className="text-2xl mt-4 sm:text-3xl md:text-xl font-light tracking-[0.2em]  text-gray-900">
+               <b>EVENT PROPOSAL PORTAL</b>
+                
+              </h1>
+           */}
               <div className="relative">
                  {/* <Image
               src="/yantra_logo_black.svg"
@@ -135,7 +141,7 @@ export default function Home() {
                 <button
                   onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="w-full bg-white text-black px-4 py-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-white text-black px-4 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24">
                     <path
@@ -160,17 +166,17 @@ export default function Home() {
                 
               </div>
             ) : (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto max-w-xs sm:max-w-none">
                 <button
                   onClick={() => router.push('/form')}
-                  className="bg-black text-white px-4 sm:px-6 py-2.5 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
+                  className="w-full sm:w-auto bg-black text-white px-4 sm:px-6 py-3 sm:py-2.5 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
                 >
                   Create Proposal
                 </button>
 
                 <button
                   onClick={() => router.push('/view')}
-                  className="bg-white text-black px-4 sm:px-6 py-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
+                  className="w-full sm:w-auto bg-white text-black px-4 sm:px-6 py-3 sm:py-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
                 >
                   View Submissions
                 </button>
@@ -179,45 +185,78 @@ export default function Home() {
           </div>
 
           {/* General Instructions Section */}
-          <div className="bg-white border-2 border-black p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide mb-4 border-b-2 border-black pb-2">
-              General Instructions
-            </h2>
-            
-            <div className="space-y-4 text-sm sm:text-base">
-              <div>
-                <h3 className="font-bold uppercase text-sm sm:text-base mb-2">About Yantra 2026</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Yantra is VIT's annual technical fest, showcasing innovation, creativity, and technical excellence. 
-                  This portal allows Core Committee members to submit event proposals for Yantra 2026.
-                </p>
+          <div className="bg-white border-2 border-black mt-8">
+            {/* Header Bar */}
+            <div className="bg-gray-50 px-6 py-4 border-b-2 border-black">
+              <h2 className="text-lg font-bold text-black tracking-tight flex items-center gap-2 uppercase">
+                <svg className="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                General Instructions
+              </h2>
+            </div>
+
+            <div className="p-6 sm:p-8 space-y-8">
+              
+              {/* Section 1: About & Theme */}
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">About Yantra</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed text-justify">
+                    Yantra is a week-long celebration of <span className="italic">technical innovation</span>, where all technical clubs and chapters organize events such as competitions, workshops, hackathons, and technical talks. Like every year, the event is conducted under the <span className="font-bold">Office of Students’ Welfare</span> and coordinated by the <span className="italic">Student Council</span>. All events are free and exclusively for VIT students.
+                  </p>
+                </div>
+                
+                {/* Theme Card */}
+                <div className="bg-gray-50 border border-black p-4 md:col-span-1">
+                  <p className="text-xs font-semibold text-black uppercase tracking-wide mb-1">
+                    This Year&apos;s Theme
+                  </p>
+                  <p className="text-base font-bold text-gray-900">
+                    AI for Social Responsibility
+                  </p>
+                   <p className="text-xs text-gray-500 mt-2 leading-snug">
+
+        Events from all disciplines are encouraged, as long as they align with the technical nature of Yantra.
+
+        </p>
+                </div>
               </div>
 
+              <hr className="border-gray-200" />
+
+              {/* Section 2: Guidelines */}
               <div>
-                <h3 className="font-bold uppercase text-sm sm:text-base mb-2">Proposal Submission Guidelines</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700 leading-relaxed">
-                  <li>Only VIT email addresses (@vitstudent.ac.in or @vit.ac.in) are permitted to submit proposals.</li>
-                  <li>Fill out all required fields in the proposal form with accurate information.</li>
-                  <li>Provide detailed descriptions of your event, including objectives, target audience, and expected outcomes.</li>
-                  <li>Specify venue preferences, expected capacity, duration, and resource requirements clearly.</li>
-                  <li>Include information about Point of Contact (POC) for the event.</li>
-                  <li>Review your proposal carefully before submission as changes may not be possible later.</li>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+                  Submission Guidelines
+                </h3>
+                
+                <ul className="space-y-3">
+                  {[
+                    "Only the official representative of the club/chapter is allowed to fill out the proposal form, and the submission must be made through a valid VIT email ID.",
+                    "Fill out all required fields in the proposal form with accurate and complete information.",
+                    "Provide detailed descriptions of the event, including objectives, target audience, and expected outcomes (this will be displayed on the Yantra website).",
+                    "Clearly specify venue preferences, expected capacity, and event duration; final allocation will depend on availability.",
+                    "Include complete details of the Point of Contact (POC) for the event."
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="shrink-0 mt-1.5 w-1.5 h-1.5 bg-black"></div>
+                      <span className="text-sm text-gray-600 leading-relaxed">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                  <li className="flex items-start gap-3">
+                    <div className="shrink-0 mt-1.5 w-1.5 h-1.5 bg-black"></div>
+                    <span className="text-sm text-gray-600 leading-relaxed">
+                      All clubs and chapters are requested to begin planning their events and submit proposals on or before <span className="font-bold text-gray-900">18/12/2025</span>.
+                    </span>
+                  </li>
                 </ul>
               </div>
-
-              <div>
-                <h3 className="font-bold uppercase text-sm sm:text-base mb-2">Important Notes</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700 leading-relaxed">
-                  <li>Ensure all budget estimates (sponsorship, prize money) are realistic and justified.</li>
-                  <li>For workshops, provide detailed information about content, prerequisites, and learning outcomes.</li>
-                  <li>For competitions and hackathons, clearly define rules, judging criteria, and team structure.</li>
-                  <li>Submit your proposal well before the deadline to allow time for review and feedback.</li>
-                </ul>
-              </div>
-
-              <div className="bg-gray-50 border-l-4 border-black p-3 mt-4">
-                <p className="font-semibold text-sm sm:text-base">
-                  For any queries or technical issues, please contact the Yantra organizing committee.
+              <div className="bg-gray-50 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 px-6 py-4 mt-4 text-center sm:text-left border-t-2 border-black">
+                <p className="text-xs text-gray-900">
+                  <span className="font-bold text-black uppercase">Need Assistance?</span> For queries or technical issues, please contact the Yantra Organizing Committee.
                 </p>
               </div>
             </div>

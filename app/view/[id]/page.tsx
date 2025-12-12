@@ -422,16 +422,16 @@ export default function EditProposal() {
       <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header with Edit Toggle Button */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-wider">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-wider">
               {isEditMode ? 'Edit Proposal' : 'View Proposal'}
             </h1>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => router.push('/view')}
-                className="px-3 sm:px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm"
+                className="px-3 sm:px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
               >
                 ← Back
               </button>
@@ -439,7 +439,7 @@ export default function EditProposal() {
               <button
                 type="button"
                 onClick={toggleEditMode}
-                className={`px-3 sm:px-4 py-2 border-2 transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2 border-2 transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                   isEditMode
                     ? 'border-red-600 bg-red-600 text-white hover:bg-white hover:text-red-600'
                     : 'border-black bg-black text-white hover:bg-white hover:text-black'
@@ -447,15 +447,15 @@ export default function EditProposal() {
               >
                 {isEditMode ? (
                   <>
-                    <span>✕</span>
-                    <span>Cancel</span>
+                    <span className="text-base sm:text-lg">✕</span>
+                    <span className="hidden xs:inline">Cancel</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <span>Edit</span>
+                    <span className="hidden xs:inline">Edit</span>
                   </>
                 )}
               </button>
@@ -1126,7 +1126,7 @@ export default function EditProposal() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 sm:px-8 py-3 sm:py-3.5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'UPDATING...' : 'UPDATE PROPOSAL'}
                 </button>

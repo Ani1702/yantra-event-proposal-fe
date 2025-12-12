@@ -209,15 +209,15 @@ export default function ViewSubmissions() {
 
       <main className="flex-1 px-4 sm:px-6 md:px-8 py-6 sm:py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold uppercase tracking-wider">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wider">
               My Submissions
             </h1>
             <button
               onClick={() => router.push('/')}
-              className="bg-white text-black px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm"
+              className="w-full sm:w-auto bg-white text-black px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
             >
-              Back to Home
+              ← Back to Home
             </button>
           </div>
 
@@ -229,15 +229,15 @@ export default function ViewSubmissions() {
 
           {proposals.length === 0 ? (
             <div className="text-center py-12 border-2 border-black">
-              <p className="text-lg sm:text-xl font-bold uppercase tracking-wide mb-4">
+              <p className="text-base sm:text-lg md:text-xl font-bold uppercase tracking-wide mb-4">
                 No Proposals Found
               </p>
-              <p className="text-sm sm:text-base text-gray-600 mb-6">
+              <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-6 px-4">
                 You haven't submitted any proposals yet.
               </p>
               <button
                 onClick={() => router.push('/form')}
-                className="bg-black text-white px-6 py-3 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-sm"
+                className="bg-black text-white px-6 py-3 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm"
               >
                 Create Proposal
               </button>
@@ -247,9 +247,9 @@ export default function ViewSubmissions() {
               {proposals.map((proposal) => (
                 <div key={proposal.id} className="border-2 border-black bg-white">
                   <div className="p-4 sm:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                    <div className="flex flex-col gap-4 mb-4">
                       <div className="flex-1">
-                        <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide mb-2">
+                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide mb-2">
                           {proposal.event_title}
                         </h2>
                         <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
@@ -261,27 +261,28 @@ export default function ViewSubmissions() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-2 self-start">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(proposal.id)}
-                          className="bg-white text-black p-2 sm:p-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors"
+                          className="flex-1 sm:flex-none bg-white text-black px-4 py-2.5 sm:p-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2"
                           title="Edit Proposal"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
+                          <span className="sm:hidden font-bold uppercase text-xs">Edit</span>
                         </button>
                         {deleteConfirm === proposal.id ? (
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-1 sm:flex-none">
                             <button
                               onClick={() => handleDelete(proposal.id)}
-                              className="bg-red-600 text-white px-3 py-2 text-xs font-bold uppercase hover:bg-red-700 transition-colors"
+                              className="flex-1 sm:flex-none bg-red-600 text-white px-3 py-2 text-xs font-bold uppercase hover:bg-red-700 transition-colors whitespace-nowrap"
                             >
                               Confirm
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
-                              className="bg-gray-200 text-black px-3 py-2 text-xs font-bold uppercase hover:bg-gray-300 transition-colors"
+                              className="flex-1 sm:flex-none bg-gray-200 text-black px-3 py-2 text-xs font-bold uppercase hover:bg-gray-300 transition-colors whitespace-nowrap"
                             >
                               Cancel
                             </button>
@@ -289,12 +290,13 @@ export default function ViewSubmissions() {
                         ) : (
                           <button
                             onClick={() => setDeleteConfirm(proposal.id)}
-                            className="bg-red-600 text-white p-2 sm:p-2.5 border-2 border-red-600 hover:bg-red-700 transition-colors"
+                            className="flex-1 sm:flex-none bg-red-600 text-white px-4 py-2.5 sm:p-2.5 border-2 border-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                             title="Delete Proposal"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
+                            <span className="sm:hidden font-bold uppercase text-xs">Delete</span>
                           </button>
                         )}
                       </div>
