@@ -8,7 +8,7 @@ import UserBar from '@/components/UserBar';
 import CustomSelect from '@/components/CustomSelect';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomTimePicker from '@/components/CustomTimePicker';
-import { supabase, signOutCompletely } from '@/lib/supabase';
+import { supabase, signOutCompletely, getValidAccessToken } from '@/lib/supabase';
 import { CLUB_NAMES, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
 
 export default function EditProposal() {
@@ -95,7 +95,21 @@ export default function EditProposal() {
 
       // Load proposal data
       try {
-        const accessToken = session.access_token;
+        // Get a valid, refreshed access token
+        const accessToken = await getValidAccessToken();
+        
+        if (!accessToken) {
+          setStatus({
+            type: 'error',
+            message: 'Session expired. Please sign in again.',
+          });
+          setTimeout(async () => {
+            await signOutCompletely();
+            router.push('/');
+          }, 2000);
+          return;
+        }
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/${proposalId}`,
           {
@@ -323,8 +337,20 @@ export default function EditProposal() {
     setErrors({});
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
+      // Get a valid, refreshed access token
+      const accessToken = await getValidAccessToken();
+      
+      if (!accessToken) {
+        setStatus({
+          type: 'error',
+          message: 'Session expired. Please sign in again.',
+        });
+        setTimeout(async () => {
+          await signOutCompletely();
+          router.push('/');
+        }, 2000);
+        return;
+      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/${proposalId}`,
@@ -751,7 +777,7 @@ export default function EditProposal() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      POC Contact <span className="text-red-600">*</span>
+                      POC Contact (WhatsApp)<span className="text-red-600">*</span>
                     </label>
                     <input
                       type="tel"
@@ -801,16 +827,13 @@ export default function EditProposal() {
                   <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
                     Collaborating Club/Chapter (if any)
                   </label>
-                  <input
-                    type="text"
-                    name="collaborating_cc"
+                  <CustomSelect
+                    id="collaborating_cc"
+                    options={clubOptions.filter(club => club.value !== formData.cc_name)}
                     value={formData.collaborating_cc}
-                    onChange={handleChange}
+                    onChange={(value) => handleSelectChange('collaborating_cc', value)}
+                    placeholder="Select collaborating club (if any)"
                     disabled={!isEditMode}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                      isEditMode ? 'bg-white' : 'bg-gray-100'
-                    }`}
-                    placeholder="Enter collaborating club name"
                   />
                 </div>
               </div>
@@ -1045,7 +1068,7 @@ export default function EditProposal() {
                       className="w-4 h-4 border-2 border-black"
                     />
                     <label htmlFor="eligibility_first_year" className="text-xs sm:text-sm font-medium">
-                      First Year
+                      I Year
                     </label>
                   </div>
 
@@ -1060,7 +1083,7 @@ export default function EditProposal() {
                       className="w-4 h-4 border-2 border-black"
                     />
                     <label htmlFor="eligibility_second_year" className="text-xs sm:text-sm font-medium">
-                      Second Year
+                      II Year
                     </label>
                   </div>
 
@@ -1075,7 +1098,7 @@ export default function EditProposal() {
                       className="w-4 h-4 border-2 border-black"
                     />
                     <label htmlFor="eligibility_third_year" className="text-xs sm:text-sm font-medium">
-                      Third Year
+                      III Year
                     </label>
                   </div>
 
@@ -1090,7 +1113,7 @@ export default function EditProposal() {
                       className="w-4 h-4 border-2 border-black"
                     />
                     <label htmlFor="eligibility_fourth_year" className="text-xs sm:text-sm font-medium">
-                      Fourth Year
+                      Final Year (IV & V Year)
                     </label>
                   </div>
                 </div>

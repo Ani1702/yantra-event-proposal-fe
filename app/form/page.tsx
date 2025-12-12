@@ -8,7 +8,7 @@ import UserBar from '@/components/UserBar';
 import CustomSelect from '@/components/CustomSelect';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomTimePicker from '@/components/CustomTimePicker';
-import { supabase, signOutCompletely } from '@/lib/supabase';
+import { supabase, signOutCompletely, getValidAccessToken } from '@/lib/supabase';
 import { CLUB_NAMES, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
 
 export default function ProposalForm() {
@@ -265,9 +265,21 @@ export default function ProposalForm() {
     setErrors({});
 
     try {
+      // Get a valid, refreshed access token
+      const accessToken = await getValidAccessToken();
       
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
+      if (!accessToken) {
+        setStatus({
+          type: 'error',
+          message: 'Session expired. Please sign in again.',
+        });
+        // Redirect to login after a short delay
+        setTimeout(async () => {
+          await signOutCompletely();
+          router.push('/');
+        }, 2000);
+        return;
+      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal`, {
         method: 'POST',
@@ -728,7 +740,7 @@ export default function ProposalForm() {
                   htmlFor="poc_contact"
                   className="block text-xs sm:text-sm font-bold mb-1.5 sm:mb-2 text-black uppercase tracking-wide"
                 >
-                  POC Contact Number *
+                  POC Contact Number (WhatsApp) *
                 </label>
                 <input
                   type="tel"

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import UserBar from '@/components/UserBar';
-import { supabase, signOutCompletely } from '@/lib/supabase';
+import { supabase, signOutCompletely, getValidAccessToken } from '@/lib/supabase';
 
 interface Proposal {
   id: string;
@@ -54,23 +54,31 @@ export default function ViewSubmissions() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        router.push('/');
-        return;
-      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          setLoading(false);
+          router.push('/');
+          return;
+        }
 
-      const email = session.user.email || '';
-      if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vit.ac.in')) {
-        await signOutCompletely();
-        router.push('/');
-        return;
-      }
+        const email = session.user.email || '';
+        if (!email.endsWith('@vitstudent.ac.in') && !email.endsWith('@vit.ac.in')) {
+          setLoading(false);
+          await signOutCompletely();
+          router.push('/');
+          return;
+        }
 
-      setUser(session.user);
-      await fetchProposals(session.access_token);
-      setLoading(false);
+        setUser(session.user);
+        await fetchProposals();
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setError('Authentication error. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
 
     checkAuth();
@@ -84,8 +92,20 @@ export default function ViewSubmissions() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const fetchProposals = async (accessToken: string | undefined) => {
+  const fetchProposals = async () => {
     try {
+      // Get a valid, refreshed access token
+      const accessToken = await getValidAccessToken();
+      
+      if (!accessToken) {
+        setError('Session expired. Please sign in again.');
+        setTimeout(async () => {
+          await signOutCompletely();
+          router.push('/');
+        }, 2000);
+        return;
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/my-proposals`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -96,21 +116,34 @@ export default function ViewSubmissions() {
 
       if (response.ok) {
         setProposals(data.data);
+        setError('');
       } else {
         setError(data.message || 'Failed to fetch proposals');
       }
     } catch (error) {
+      console.error('Fetch proposals error:', error);
       setError('Network error. Please ensure the backend server is running.');
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Get a valid, refreshed access token
+      const accessToken = await getValidAccessToken();
+      
+      if (!accessToken) {
+        setError('Session expired. Please sign in again.');
+        setTimeout(async () => {
+          await signOutCompletely();
+          router.push('/');
+        }, 2000);
+        return;
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
