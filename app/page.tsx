@@ -213,7 +213,7 @@ export default function Home() {
                     This Year&apos;s Theme
                   </p>
                   <p className="text-base font-bold text-gray-900">
-                    AI for Social Responsibility
+                    Leveraging Web3 for Social Responsibility
                   </p>
                    <p className="text-xs text-gray-500 mt-2 leading-snug">
 
@@ -249,7 +249,7 @@ export default function Home() {
                   <li className="flex items-start gap-3">
                     <div className="shrink-0 mt-1.5 w-1.5 h-1.5 bg-black"></div>
                     <span className="text-sm text-gray-600 leading-relaxed">
-                      All clubs and chapters are requested to begin planning their events and submit proposals on or before <span className="font-bold text-gray-900">18/12/2025</span>.
+                      All clubs and chapters are requested to begin planning their events and submit proposals on or before <span className="font-bold text-gray-900">25/12/2025</span>.
                     </span>
                   </li>
                 </ul>
