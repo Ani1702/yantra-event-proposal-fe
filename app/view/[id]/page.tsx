@@ -565,7 +565,7 @@ export default function EditProposal() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      Duration (minutes) <span className="text-red-600">*</span>
+                      Duration (hours) <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="number"
