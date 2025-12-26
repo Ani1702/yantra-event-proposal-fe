@@ -9,7 +9,7 @@ import CustomSelect from '@/components/CustomSelect';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomTimePicker from '@/components/CustomTimePicker';
 import { supabase, signOutCompletely, getValidAccessToken } from '@/lib/supabase';
-import { CLUB_NAMES, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
+import { CLUB_NAMES, ALL_COLLAB_CLUBS, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
 
 export default function EditProposal() {
   const router = useRouter();
@@ -19,10 +19,14 @@ export default function EditProposal() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [originalData, setOriginalData] = useState<any>(null);
 
   // Map club names to the format required by CustomSelect
   const clubOptions = CLUB_NAMES.map((club) => ({
+    value: club,
+    label: club,
+  }));
+
+  const collabClubOptions = ALL_COLLAB_CLUBS.map((club) => ({
     value: club,
     label: club,
   }));
@@ -67,6 +71,7 @@ export default function EditProposal() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [originalData, setOriginalData] = useState(formData);
 
   // Scroll to top when status message changes
   useEffect(() => {
@@ -171,7 +176,6 @@ export default function EditProposal() {
         };
 
         setFormData(loadedData);
-        setOriginalData(loadedData);
         setLoading(false);
       } catch (error) {
         console.error('Error loading proposal:', error);
@@ -829,7 +833,7 @@ export default function EditProposal() {
                   </label>
                   <CustomSelect
                     id="collaborating_cc"
-                    options={clubOptions.filter(club => club.value !== formData.cc_name)}
+                    options={collabClubOptions.filter(club => club.value !== formData.cc_name)}
                     value={formData.collaborating_cc}
                     onChange={(value) => handleSelectChange('collaborating_cc', value)}
                     placeholder="Select collaborating club (if any)"

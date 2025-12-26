@@ -9,7 +9,7 @@ import CustomSelect from '@/components/CustomSelect';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomTimePicker from '@/components/CustomTimePicker';
 import { supabase, signOutCompletely, getValidAccessToken } from '@/lib/supabase';
-import { CLUB_NAMES, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
+import { CLUB_NAMES, ALL_COLLAB_CLUBS, VENUE_OPTIONS, EVENT_TYPE_OPTIONS, WORKSHOP_TYPE_OPTIONS } from '@/lib/constants';
 
 export default function ProposalForm() {
   const router = useRouter();
@@ -18,6 +18,11 @@ export default function ProposalForm() {
 
   // Map club names to the format required by CustomSelect
   const clubOptions = CLUB_NAMES.map((club) => ({
+    value: club,
+    label: club,
+  }));
+
+  const collabClubOptions = ALL_COLLAB_CLUBS.map((club) => ({
     value: club,
     label: club,
   }));
@@ -788,7 +793,7 @@ export default function ProposalForm() {
               </label>
               <CustomSelect
                 id="collaborating_cc"
-                options={clubOptions.filter(club => club.value !== formData.cc_name)}
+                options={collabClubOptions.filter(club => club.value !== formData.cc_name)}
                 value={formData.collaborating_cc}
                 onChange={(value) => handleSelectChange('collaborating_cc', value)}
                 placeholder="Select collaborating club (if any)"
