@@ -235,12 +235,12 @@ export default function ViewSubmissions() {
               <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-6 px-4">
                 You haven't submitted any proposals yet.
               </p>
-              <button
+              {/* <button
                 onClick={() => router.push('/form')}
                 className="bg-black text-white px-6 py-3 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm"
               >
                 Create Proposal
-              </button>
+              </button> */}
             </div>
           ) : (
             <div className="space-y-4">

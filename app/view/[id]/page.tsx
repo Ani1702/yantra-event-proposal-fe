@@ -83,7 +83,7 @@ export default function EditProposal() {
   useEffect(() => {
     const checkAuthAndLoadProposal = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user) {
         router.push('/');
         return;
@@ -102,7 +102,7 @@ export default function EditProposal() {
       try {
         // Get a valid, refreshed access token
         const accessToken = await getValidAccessToken();
-        
+
         if (!accessToken) {
           setStatus({
             type: 'error',
@@ -130,7 +130,7 @@ export default function EditProposal() {
 
         const responseData = await response.json();
         const proposal = responseData.data || responseData;
-        
+
         // Check if this proposal belongs to the current user
         if (proposal.submitted_by !== session.user.email) {
           setStatus({
@@ -225,13 +225,13 @@ export default function EditProposal() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     if (!isEditMode) return;
-    
+
     const { name, value, type, checked } = e.target as HTMLInputElement;
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
-    
+
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -242,12 +242,12 @@ export default function EditProposal() {
 
   const handleSelectChange = (name: string, value: string) => {
     if (!isEditMode) return;
-    
+
     setFormData({
       ...formData,
       [name]: value,
     });
-    
+
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -311,16 +311,16 @@ export default function EditProposal() {
       if (!formData.speaker_name) newErrors.speaker_name = 'Please enter speaker name';
     }
 
-    if (!formData.eligibility_first_year && !formData.eligibility_second_year && 
-        !formData.eligibility_third_year && !formData.eligibility_fourth_year) {
+    if (!formData.eligibility_first_year && !formData.eligibility_second_year &&
+      !formData.eligibility_third_year && !formData.eligibility_fourth_year) {
       newErrors.eligibility = 'Please select at least one eligibility year';
     }
 
-    if (formData.event_start_date && formData.event_start_time && 
-        formData.event_end_date && formData.event_end_time) {
+    if (formData.event_start_date && formData.event_start_time &&
+      formData.event_end_date && formData.event_end_time) {
       const startDateTime = new Date(`${formData.event_start_date}T${formData.event_start_time}`);
       const endDateTime = new Date(`${formData.event_end_date}T${formData.event_end_time}`);
-      
+
       if (startDateTime >= endDateTime) {
         newErrors.event_end_date = 'Event end date/time must be after start date/time';
         newErrors.event_end_time = 'Event end date/time must be after start date/time';
@@ -343,7 +343,7 @@ export default function EditProposal() {
     try {
       // Get a valid, refreshed access token
       const accessToken = await getValidAccessToken();
-      
+
       if (!accessToken) {
         setStatus({
           type: 'error',
@@ -383,7 +383,7 @@ export default function EditProposal() {
         });
         setIsEditMode(false);
         setOriginalData(formData);
-        
+
         // Redirect to view page after 2 seconds
         setTimeout(() => {
           router.push('/view');
@@ -430,7 +430,7 @@ export default function EditProposal() {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-wider">
               {isEditMode ? 'Edit Proposal' : 'View Proposal'}
             </h1>
-            
+
             <div className="flex gap-2 shrink-0">
               <button
                 type="button"
@@ -439,8 +439,8 @@ export default function EditProposal() {
               >
                 ← Back
               </button>
-              
-              <button
+
+              {/* <button
                 type="button"
                 onClick={toggleEditMode}
                 className={`px-3 sm:px-4 py-2 border-2 transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
@@ -462,18 +462,17 @@ export default function EditProposal() {
                     <span className="hidden xs:inline">Edit</span>
                   </>
                 )}
-              </button>
+              </button> */}
             </div>
           </div>
 
           {/* Status Message */}
           {status.message && (
             <div
-              className={`mb-6 p-3 sm:p-4 border-2 ${
-                status.type === 'success'
+              className={`mb-6 p-3 sm:p-4 border-2 ${status.type === 'success'
                   ? 'bg-green-50 border-green-600 text-green-800'
                   : 'bg-red-50 border-red-600 text-red-800'
-              }`}
+                }`}
             >
               <p className="text-xs sm:text-sm font-medium">{status.message}</p>
             </div>
@@ -535,9 +534,8 @@ export default function EditProposal() {
                     value={formData.event_title}
                     onChange={handleChange}
                     disabled={!isEditMode}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                      isEditMode ? 'bg-white' : 'bg-gray-100'
-                    }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                      }`}
                     placeholder="Enter event title"
                   />
                   {errors.event_title && (
@@ -557,9 +555,8 @@ export default function EditProposal() {
                       value={formData.expected_capacity}
                       onChange={handleChange}
                       disabled={!isEditMode}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                        isEditMode ? 'bg-white' : 'bg-gray-100'
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                        }`}
                       placeholder="Enter capacity"
                     />
                     {errors.expected_capacity && (
@@ -577,9 +574,8 @@ export default function EditProposal() {
                       value={formData.duration}
                       onChange={handleChange}
                       disabled={!isEditMode}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                        isEditMode ? 'bg-white' : 'bg-gray-100'
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                        }`}
                       placeholder="Enter duration"
                     />
                     {errors.duration && (
@@ -702,9 +698,8 @@ export default function EditProposal() {
                     value={formData.expected_sponsorship}
                     onChange={handleChange}
                     disabled={!isEditMode}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                      isEditMode ? 'bg-white' : 'bg-gray-100'
-                    }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                      }`}
                     placeholder="Enter amount"
                   />
                   {errors.expected_sponsorship && (
@@ -722,9 +717,8 @@ export default function EditProposal() {
                     value={formData.expected_prize_money}
                     onChange={handleChange}
                     disabled={!isEditMode}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                      isEditMode ? 'bg-white' : 'bg-gray-100'
-                    }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                      }`}
                     placeholder="Enter amount"
                   />
                 </div>
@@ -748,9 +742,8 @@ export default function EditProposal() {
                     value={formData.poc_name}
                     onChange={handleChange}
                     disabled={!isEditMode}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                      isEditMode ? 'bg-white' : 'bg-gray-100'
-                    }`}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                      }`}
                     placeholder="Enter POC name"
                   />
                   {errors.poc_name && (
@@ -769,9 +762,8 @@ export default function EditProposal() {
                       value={formData.poc_registration_number}
                       onChange={handleChange}
                       disabled={!isEditMode}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                        isEditMode ? 'bg-white' : 'bg-gray-100'
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                        }`}
                       placeholder="Enter registration number"
                     />
                     {errors.poc_registration_number && (
@@ -789,9 +781,8 @@ export default function EditProposal() {
                       value={formData.poc_contact}
                       onChange={handleChange}
                       disabled={!isEditMode}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                        isEditMode ? 'bg-white' : 'bg-gray-100'
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                        }`}
                       placeholder="10-digit number"
                       maxLength={10}
                     />
@@ -862,9 +853,8 @@ export default function EditProposal() {
                       onChange={handleChange}
                       disabled={!isEditMode}
                       rows={4}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${
-                        isEditMode ? 'bg-white' : 'bg-gray-100'
-                      }`}
+                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                        }`}
                       placeholder="Provide a detailed description of your event"
                     />
                     {errors.description && (
@@ -885,9 +875,8 @@ export default function EditProposal() {
                           onChange={handleChange}
                           disabled={!isEditMode}
                           rows={3}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${
-                            isEditMode ? 'bg-white' : 'bg-gray-100'
-                          }`}
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                            }`}
                           placeholder="Describe the structure (rounds, format, etc.)"
                         />
                         {errors.competition_structure && (
@@ -905,9 +894,8 @@ export default function EditProposal() {
                           onChange={handleChange}
                           disabled={!isEditMode}
                           rows={3}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${
-                            isEditMode ? 'bg-white' : 'bg-gray-100'
-                          }`}
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                            }`}
                           placeholder="List the rules and regulations"
                         />
                         {errors.competition_rules && (
@@ -925,9 +913,8 @@ export default function EditProposal() {
                           onChange={handleChange}
                           disabled={!isEditMode}
                           rows={3}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${
-                            isEditMode ? 'bg-white' : 'bg-gray-100'
-                          }`}
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                            }`}
                           placeholder="Explain how entries will be judged"
                         />
                         {errors.judgement_criteria && (
@@ -945,9 +932,8 @@ export default function EditProposal() {
                           onChange={handleChange}
                           disabled={!isEditMode}
                           rows={3}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${
-                            isEditMode ? 'bg-white' : 'bg-gray-100'
-                          }`}
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                            }`}
                           placeholder="List common questions and answers"
                         />
                         {errors.faqs && (
@@ -965,9 +951,8 @@ export default function EditProposal() {
                           value={formData.team_size}
                           onChange={handleChange}
                           disabled={!isEditMode}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                            isEditMode ? 'bg-white' : 'bg-gray-100'
-                          }`}
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                            }`}
                           placeholder="e.g., 1-4 members per team"
                         />
                         {errors.team_size && (
@@ -1007,9 +992,8 @@ export default function EditProposal() {
                           onChange={handleChange}
                           disabled={!isEditMode}
                           rows={3}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${
-                            isEditMode ? 'bg-white' : 'bg-gray-100'
-                          }`}
+                          className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm resize-none ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                            }`}
                           placeholder="What will participants learn or achieve?"
                         />
                         {errors.workshop_outcome && (
@@ -1031,9 +1015,8 @@ export default function EditProposal() {
                         value={formData.speaker_name}
                         onChange={handleChange}
                         disabled={!isEditMode}
-                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${
-                          isEditMode ? 'bg-white' : 'bg-gray-100'
-                        }`}
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
+                          }`}
                         placeholder="Enter speaker name"
                       />
                       {errors.speaker_name && (
@@ -1127,13 +1110,13 @@ export default function EditProposal() {
             {/* Submit Button - Only shown in edit mode */}
             {isEditMode && (
               <div className="flex justify-end">
-                <button
+                {/* <button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'UPDATING...' : 'UPDATE PROPOSAL'}
-                </button>
+                </button> */}
               </div>
             )}
           </form>

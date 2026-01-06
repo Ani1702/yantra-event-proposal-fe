@@ -103,19 +103,19 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           {/* Welcome Section with Yantra Logo */}
           <div className="text-center mb-10 sm:mb-12">
-           
+
             <div className="inline-block">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.2em]  text-gray-900">
                 WELCOME TO <b className='font-extrabold'>YANTRA 2026</b>
-                
+
               </h1>
-                 {/* <h1 className="text-2xl mt-4 sm:text-3xl md:text-xl font-light tracking-[0.2em]  text-gray-900">
+              {/* <h1 className="text-2xl mt-4 sm:text-3xl md:text-xl font-light tracking-[0.2em]  text-gray-900">
                <b>EVENT PROPOSAL PORTAL</b>
                 
               </h1>
            */}
               <div className="relative">
-                 {/* <Image
+                {/* <Image
               src="/yantra_logo_black.svg"
               alt="Yantra Logo"
               width={200}
@@ -163,16 +163,16 @@ export default function Home() {
                   </svg>
                   <span>{loading ? 'SIGNING IN...' : 'SIGN IN WITH GOOGLE'}</span>
                 </button>
-                
+
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto max-w-xs sm:max-w-none">
-                <button
+                {/* <button
                   onClick={() => router.push('/form')}
                   className="w-full sm:w-auto bg-black text-white px-4 sm:px-6 py-3 sm:py-2.5 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
                 >
                   Create Proposal
-                </button>
+                </button> */}
 
                 <button
                   onClick={() => router.push('/view')}
@@ -197,7 +197,7 @@ export default function Home() {
             </div>
 
             <div className="p-6 sm:p-8 space-y-8">
-              
+
               {/* Section 1: About & Theme */}
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
@@ -206,7 +206,7 @@ export default function Home() {
                     Yantra is a week-long celebration of <span className="italic">technical innovation</span>, where all technical clubs and chapters organize events such as competitions, workshops, hackathons, and technical talks. Like every year, the event is conducted under the <span className="font-bold">Office of Students’ Welfare</span> and coordinated by the <span className="italic">Student Council</span>. All events are free and exclusively for VIT students.
                   </p>
                 </div>
-                
+
                 {/* Theme Card */}
                 <div className="bg-gray-50 border border-black p-4 md:col-span-1">
                   <p className="text-xs font-semibold text-black uppercase tracking-wide mb-1">
@@ -215,11 +215,11 @@ export default function Home() {
                   <p className="text-base font-bold text-gray-900">
                     Leveraging Web3 for Social Responsibility
                   </p>
-                   <p className="text-xs text-gray-500 mt-2 leading-snug">
+                  <p className="text-xs text-gray-500 mt-2 leading-snug">
 
-        Events from all disciplines are encouraged, as long as they align with the technical nature of Yantra.
+                    Events from all disciplines are encouraged, as long as they align with the technical nature of Yantra.
 
-        </p>
+                  </p>
                 </div>
               </div>
 
@@ -230,7 +230,7 @@ export default function Home() {
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
                   Submission Guidelines
                 </h3>
-                
+
                 <ul className="space-y-3">
                   {[
                     "Only the official representative of the club/chapter is allowed to fill out the proposal form, and the submission must be made through a valid VIT email ID.",
