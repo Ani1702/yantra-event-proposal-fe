@@ -12,6 +12,7 @@ interface AdminProposal {
     id: string;
     event_name: string;
     held_by: string;
+    collaborating_cc?: string | null;
     type: string;
     status: string;
     description: string | null;
@@ -431,12 +432,13 @@ export default function AdminDashboard() {
 
     // Export to CSV
     const exportToCSV = () => {
-        const headers = ['Event Name', 'Club/Chapter', 'Type', 'Status', 'Start Date', 'End Date', 'Capacity', 'Overnight', 'Venue', 'Description', 'POC Name', 'POC Reg No', 'POC Contact', 'Expected Sponsorship', 'Expected Prize Money'];
+        const headers = ['Event Name', 'Club/Chapter', 'Collaborating Club', 'Type', 'Status', 'Start Date', 'End Date', 'Capacity', 'Overnight', 'Venue', 'Description', 'POC Name', 'POC Reg No', 'POC Contact', 'Expected Sponsorship', 'Expected Prize Money'];
         const csvContent = [
             headers.join(','),
             ...sortedProposals.map(p => [
                 `"${p.event_name.replace(/"/g, '""')}"`,
                 `"${p.held_by.replace(/"/g, '""')}"`,
+                `"${(p.collaborating_cc || '').replace(/"/g, '""')}"`,
                 p.type,
                 p.status,
                 p.duration.start_date,
@@ -767,6 +769,13 @@ export default function AdminDashboard() {
                                                             <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Description</h4>
                                                             <p className="text-sm text-gray-800 whitespace-pre-wrap">{proposal.description || 'N/A'}</p>
                                                         </div>
+
+                                                        {proposal.collaborating_cc && (
+                                                            <div>
+                                                                <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Collaborating Club</h4>
+                                                                <p className="text-sm font-bold text-blue-800">{proposal.collaborating_cc}</p>
+                                                            </div>
+                                                        )}
 
                                                         {/* Dynamic Fields */}
                                                         {(proposal.type === 'tech_competition' || proposal.type === 'hackathon') && (
