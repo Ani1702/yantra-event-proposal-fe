@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import UserBar from '@/components/UserBar';
 import { supabase, signOutCompletely, getValidAccessToken } from '@/lib/supabase';
+import LogoUploadDialog from '@/components/LogoUploadDialog';
 
 interface Proposal {
   id: string;
@@ -42,6 +43,7 @@ interface Proposal {
   submitted_by: string;
   created_at: string;
   updated_at: string;
+  logo_url: string | null;
 }
 
 export default function ViewSubmissions() {
@@ -51,12 +53,14 @@ export default function ViewSubmissions() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isLogoDialogOpen, setIsLogoDialogOpen] = useState(false);
+  const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session?.user) {
           setLoading(false);
           router.push('/');
@@ -96,7 +100,7 @@ export default function ViewSubmissions() {
     try {
       // Get a valid, refreshed access token
       const accessToken = await getValidAccessToken();
-      
+
       if (!accessToken) {
         setError('Session expired. Please sign in again.');
         setTimeout(async () => {
@@ -130,7 +134,7 @@ export default function ViewSubmissions() {
     try {
       // Get a valid, refreshed access token
       const accessToken = await getValidAccessToken();
-      
+
       if (!accessToken) {
         setError('Session expired. Please sign in again.');
         setTimeout(async () => {
@@ -161,6 +165,19 @@ export default function ViewSubmissions() {
     }
   };
 
+  const handleOpenLogoDialog = (id: string) => {
+    setSelectedProposalId(id);
+    setIsLogoDialogOpen(true);
+  };
+
+  const handleLogoSuccess = (logoUrl: string) => {
+    if (selectedProposalId) {
+      setProposals(proposals.map(p =>
+        p.id === selectedProposalId ? { ...p, logo_url: logoUrl } : p
+      ));
+    }
+  };
+
   const handleEdit = (id: string) => {
     router.push(`/view/${id}`);
   };
@@ -182,10 +199,10 @@ export default function ViewSubmissions() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -245,106 +262,111 @@ export default function ViewSubmissions() {
           ) : (
             <div className="space-y-4">
               {proposals.map((proposal) => (
-                <div key={proposal.id} className="border-2 border-black bg-white">
-                  <div className="p-4 sm:p-6">
-                    <div className="flex flex-col gap-4 mb-4">
-                      <div className="flex-1">
-                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide mb-2">
-                          {proposal.event_title}
-                        </h2>
-                        <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
-                          <span className="bg-black text-white px-3 py-1 font-bold uppercase">
-                            {getEventTypeLabel(proposal.type)}
-                          </span>
-                          <span className="border-2 border-black px-3 py-1 font-bold uppercase">
-                            {proposal.cc_name}
-                          </span>
+                <div key={proposal.id} className="border-2 border-black bg-white p-4 sm:p-6 transition-shadow hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    {/* Logo Section - Fixed Size Box */}
+                    <div
+                      onClick={() => handleOpenLogoDialog(proposal.id)}
+                      className="group relative w-full sm:w-40 h-40 shrink-0 bg-gray-50 border-2 border-dashed border-gray-300 hover:border-black transition-all cursor-pointer flex items-center justify-center overflow-hidden"
+                    >
+                      {proposal.logo_url ? (
+                        <>
+                          <img
+                            src={proposal.logo_url}
+                            alt="Event Logo"
+                            className="w-full h-full object-contain p-2"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="text-white font-bold uppercase text-xs tracking-wide border-2 border-white px-2 py-1">
+                              Change
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-gray-400 group-hover:text-black transition-colors">
+                          <svg className="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-[10px] font-bold uppercase tracking-wide">Add Logo</span>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
+                      )}
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="flex-1 min-w-0">
+                      {/* Header: Title, Tags, Button */}
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide mb-2 break-words">
+                            {proposal.event_title}
+                          </h2>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            <span className="bg-black text-white px-2 py-1 font-bold uppercase">
+                              {getEventTypeLabel(proposal.type)}
+                            </span>
+                            <span className="border-2 border-black px-2 py-1 font-bold uppercase">
+                              {proposal.cc_name}
+                            </span>
+                          </div>
+                        </div>
+
                         <button
                           onClick={() => handleEdit(proposal.id)}
-                          className="flex-1 sm:flex-none bg-white text-black px-4 py-2.5 sm:p-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2"
-                          title="Edit Proposal"
+                          className="shrink-0 bg-white text-black px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase"
                         >
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                          <span className="sm:hidden font-bold uppercase text-xs">Edit</span>
+                          View Details
                         </button>
-                        {deleteConfirm === proposal.id ? (
-                          <div className="flex gap-2 flex-1 sm:flex-none">
-                            <button
-                              onClick={() => handleDelete(proposal.id)}
-                              className="flex-1 sm:flex-none bg-red-600 text-white px-3 py-2 text-xs font-bold uppercase hover:bg-red-700 transition-colors whitespace-nowrap"
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(null)}
-                              className="flex-1 sm:flex-none bg-gray-200 text-black px-3 py-2 text-xs font-bold uppercase hover:bg-gray-300 transition-colors whitespace-nowrap"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setDeleteConfirm(proposal.id)}
-                            className="flex-1 sm:flex-none bg-red-600 text-white px-4 py-2.5 sm:p-2.5 border-2 border-red-600 hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-                            title="Delete Proposal"
-                          >
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            <span className="sm:hidden font-bold uppercase text-xs">Delete</span>
-                          </button>
-                        )}
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
-                      <div>
-                        <p className="font-bold uppercase text-xs text-gray-600">Date & Time</p>
-                        <p className="font-medium">
-                          {formatDate(proposal.event_start_date)} at {proposal.event_start_time}
+                      {/* Grid Stats */}
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 text-sm mb-4">
+                        <div>
+                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Date & Time</p>
+                          <p className="font-medium truncate">
+                            {formatDate(proposal.event_start_date)} at {proposal.event_start_time}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Duration</p>
+                          <p className="font-medium truncate">{proposal.duration} hours</p>
+                        </div>
+                        <div>
+                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Capacity</p>
+                          <p className="font-medium truncate">{proposal.expected_capacity} participants</p>
+                        </div>
+                        <div>
+                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Venue</p>
+                          <p className="font-medium truncate">{proposal.preferred_venue}</p>
+                        </div>
+                        <div>
+                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">POC</p>
+                          <p className="font-medium truncate">{proposal.poc_name}</p>
+                        </div>
+                        <div>
+                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Contact</p>
+                          <p className="font-medium truncate">{proposal.poc_contact}</p>
+                        </div>
+                      </div>
+
+                      {/* Description Preview */}
+                      {proposal.description && (
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {proposal.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="pt-3 border-t-2 border-gray-100 flex justify-between items-center">
+                        <p className="text-[10px] font-bold uppercase text-gray-400">
+                          Submitted on {formatDate(proposal.created_at)}
                         </p>
                       </div>
-                      <div>
-                        <p className="font-bold uppercase text-xs text-gray-600">Duration</p>
-                        <p className="font-medium">{proposal.duration} hours</p>
-                      </div>
-                      <div>
-                        <p className="font-bold uppercase text-xs text-gray-600">Capacity</p>
-                        <p className="font-medium">{proposal.expected_capacity} participants</p>
-                      </div>
-                      <div>
-                        <p className="font-bold uppercase text-xs text-gray-600">Venue</p>
-                        <p className="font-medium">{proposal.preferred_venue}</p>
-                      </div>
-                      <div>
-                        <p className="font-bold uppercase text-xs text-gray-600">POC</p>
-                        <p className="font-medium">{proposal.poc_name}</p>
-                      </div>
-                      <div>
-                        <p className="font-bold uppercase text-xs text-gray-600">Contact</p>
-                        <p className="font-medium">{proposal.poc_contact}</p>
-                      </div>
-                    </div>
-
-                    {proposal.description && (
-                      <div className="mt-4 pt-4 border-t-2 border-gray-200">
-                        <p className="font-bold uppercase text-xs text-gray-600 mb-2">Description</p>
-                        <p className="text-sm text-gray-700 line-clamp-3">
-                          {proposal.description}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="mt-4 pt-4 border-t-2 border-gray-200">
-                      <p className="font-bold uppercase text-xs text-gray-600 mb-2">Submitted On</p>
-                      <p className="text-sm text-gray-700">
-                        {formatDate(proposal.created_at)} at {new Date(proposal.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -352,6 +374,12 @@ export default function ViewSubmissions() {
             </div>
           )}
         </div>
+        <LogoUploadDialog
+          isOpen={isLogoDialogOpen}
+          onClose={() => setIsLogoDialogOpen(false)}
+          proposalId={selectedProposalId || ''}
+          onSuccess={handleLogoSuccess}
+        />
       </main>
 
       <Footer />

@@ -15,6 +15,7 @@ interface AdminProposal {
     collaborating_cc?: string | null;
     type: string;
     status: string;
+    logo_url?: string | null;
     description: string | null;
     // Dynamic fields
     competition_structure?: string | null;
@@ -681,9 +682,18 @@ export default function AdminDashboard() {
                                         >
                                             {/* Mobile: Stacked View */}
                                             <div className="md:col-span-4 flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="font-bold text-sm md:text-base">{proposal.event_name}</h3>
-                                                    <p className="text-xs text-gray-500 uppercase">{proposal.held_by}</p>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 shrink-0 bg-gray-100 border border-gray-300 flex items-center justify-center overflow-hidden">
+                                                        {proposal.logo_url ? (
+                                                            <img src={proposal.logo_url} alt="Logo" className="w-full h-full object-contain p-1" />
+                                                        ) : (
+                                                            <span className="text-[8px] text-gray-400 font-bold text-center leading-tight">NO<br />LOGO</span>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-sm md:text-base">{proposal.event_name}</h3>
+                                                        <p className="text-xs text-gray-500 uppercase">{proposal.held_by}</p>
+                                                    </div>
                                                 </div>
                                                 {/* Mobile Expand Indicator */}
                                                 <span className="md:hidden text-xl font-bold text-gray-400">
