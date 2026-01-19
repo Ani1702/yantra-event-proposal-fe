@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -54,6 +54,14 @@ export default function AdminDashboard() {
     const [proposals, setProposals] = useState<AdminProposal[]>([]);
     const [error, setError] = useState('');
 
+    // Pagination State
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0
+    });
+
     // Filter States
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedType, setSelectedType] = useState('all');
@@ -66,12 +74,16 @@ export default function AdminDashboard() {
     const [sortField, setSortField] = useState<'date' | 'capacity' | 'name'>('date');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+    // Filter Options
+    const [clubOptions, setClubOptions] = useState<string[]>([]);
+
     // Expanded Rows State
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
     // Status Update State
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
+    // Initial Auth Check
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -87,12 +99,12 @@ export default function AdminDashboard() {
 
                 // Check admin status via Backend API
                 const accessToken = await getValidAccessToken();
-                const adminCheck = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/admin/status`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/status`, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     },
                 });
-                const adminData = await adminCheck.json();
+                const adminData = await response.json();
 
                 if (!adminData.isAdmin) {
                     setError('Access denied. Authorized personnel only.');
@@ -102,7 +114,8 @@ export default function AdminDashboard() {
                 }
 
                 setUser(session.user);
-                await fetchProposals();
+                await fetchClubOptions();
+                // Proposals will be fetched by the dependency effect below
             } catch (error) {
                 console.error('Auth check error:', error);
                 setError('Authentication error. Please try again.');
@@ -122,20 +135,46 @@ export default function AdminDashboard() {
         return () => subscription.unsubscribe();
     }, [router]);
 
-    const fetchProposals = async () => {
+    const fetchClubOptions = async () => {
         try {
             const accessToken = await getValidAccessToken();
-
-            if (!accessToken) {
-                setError('Session expired. Please sign in again.');
-                setTimeout(async () => {
-                    await signOutCompletely();
-                    router.push('/');
-                }, 2000);
-                return;
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/options`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            const data = await response.json();
+            if (data.success) {
+                setClubOptions(data.clubs);
             }
+        } catch (error) {
+            console.error('Error fetching club options:', error);
+        }
+    };
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/admin/all-submissions`, {
+    const fetchProposals = useCallback(async () => {
+        if (!user) return; // Wait for auth
+
+        try {
+            const accessToken = await getValidAccessToken();
+            if (!accessToken) return;
+
+            // Build query string
+            const params = new URLSearchParams();
+            params.append('page', pagination.page.toString());
+            params.append('limit', pagination.limit.toString());
+            params.append('sortField', sortField);
+            params.append('sortDirection', sortDirection);
+
+            if (searchQuery) params.append('search', searchQuery);
+            if (selectedType !== 'all') params.append('type', selectedType);
+            if (selectedClub !== 'all') params.append('club', selectedClub);
+            if (selectedStatus !== 'all') params.append('status', selectedStatus);
+            if (startDateFilter) params.append('start_date', startDateFilter);
+            if (selectedOvernight !== 'all') params.append('is_overnight', selectedOvernight);
+
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/all-submissions?${params.toString()}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                 },
@@ -145,6 +184,13 @@ export default function AdminDashboard() {
 
             if (response.ok) {
                 setProposals(data.data);
+                if (data.pagination) {
+                    setPagination(prev => ({
+                        ...prev,
+                        total: data.pagination.total,
+                        totalPages: data.pagination.totalPages
+                    }));
+                }
                 setError('');
             } else {
                 setError(data.message || 'Failed to fetch proposals');
@@ -153,14 +199,37 @@ export default function AdminDashboard() {
             console.error('Fetch proposals error:', error);
             setError('Network error. Please ensure the backend server is running.');
         }
-    };
+    }, [
+        user,
+        pagination.page,
+        pagination.limit,
+        searchQuery,
+        selectedType,
+        selectedClub,
+        selectedStatus,
+        startDateFilter,
+        selectedOvernight,
+        sortField,
+        sortDirection
+    ]);
+
+    // Fetch when filters/sort/page change
+    useEffect(() => {
+        fetchProposals();
+    }, [fetchProposals]);
+
+    // Reset page on filter change
+    useEffect(() => {
+        setPagination(prev => ({ ...prev, page: 1 }));
+    }, [searchQuery, selectedType, selectedClub, selectedStatus, startDateFilter, selectedOvernight]);
+
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
             setUpdatingStatus(id);
             const accessToken = await getValidAccessToken();
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/admin/proposal/${id}/status`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/proposal/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -225,66 +294,6 @@ export default function AdminDashboard() {
             day: 'numeric'
         });
     };
-
-    // Derived Data: Unique Clubs for Dropdown
-    const uniqueClubs = useMemo(() => {
-        const clubs = new Set(proposals.map(p => p.held_by));
-        return Array.from(clubs).sort();
-    }, [proposals]);
-
-    // Filtering Logic
-    const filteredProposals = useMemo(() => {
-        return proposals.filter(proposal => {
-            // Search Query
-            const searchLower = searchQuery.toLowerCase();
-            const matchesSearch =
-                proposal.event_name.toLowerCase().includes(searchLower) ||
-                proposal.held_by.toLowerCase().includes(searchLower);
-
-            // Type Filter
-            const matchesType = selectedType === 'all' || proposal.type === selectedType;
-
-            // Club Filter
-            const matchesClub = selectedClub === 'all' || proposal.held_by === selectedClub;
-
-            // Overnight Filter
-            const matchesOvernight =
-                selectedOvernight === 'all' ||
-                (selectedOvernight === 'yes' && proposal.duration.is_overnight) ||
-                (selectedOvernight === 'no' && !proposal.duration.is_overnight);
-
-            // Status Filter
-            const matchesStatus = selectedStatus === 'all' || proposal.status === selectedStatus;
-
-            // Date Filter
-            const matchesDate = !startDateFilter || proposal.duration.start_date === startDateFilter;
-
-            return matchesSearch && matchesType && matchesClub && matchesOvernight && matchesDate && matchesStatus;
-        });
-    }, [proposals, searchQuery, selectedType, selectedClub, selectedOvernight, selectedStatus, startDateFilter]);
-
-    // Sorting Logic
-    const sortedProposals = useMemo(() => {
-        return [...filteredProposals].sort((a, b) => {
-            let comparison = 0;
-            if (sortField === 'date') {
-                comparison = new Date(a.duration.start_date).getTime() - new Date(b.duration.start_date).getTime();
-            } else if (sortField === 'capacity') {
-                comparison = a.capacity - b.capacity;
-            } else if (sortField === 'name') {
-                comparison = a.event_name.localeCompare(b.event_name);
-            }
-            return sortDirection === 'asc' ? comparison : -comparison;
-        });
-    }, [filteredProposals, sortField, sortDirection]);
-
-    // Stats Logic
-    const stats = useMemo(() => {
-        const total = filteredProposals.length;
-        const totalCapacity = filteredProposals.reduce((sum, p) => sum + p.capacity, 0);
-        const overnightCount = filteredProposals.filter(p => p.duration.is_overnight).length;
-        return { total, totalCapacity, overnightCount };
-    }, [filteredProposals]);
 
     // Toggle Row Expansion
     const toggleRow = (index: number) => {
@@ -374,7 +383,7 @@ export default function AdminDashboard() {
 
         try {
             const accessToken = await getValidAccessToken();
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/admin/proposal/${id}/logistics`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/proposal/${id}/logistics`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -398,6 +407,7 @@ export default function AdminDashboard() {
                             preferred_venue: newVenue,
                             duration: {
                                 ...p.duration,
+                                ...changes,
                                 start_date: newStartDate,
                                 start_time: newStartTime,
                                 end_date: newEndDate,
@@ -431,41 +441,55 @@ export default function AdminDashboard() {
         }
     };
 
-    // Export to CSV
-    const exportToCSV = () => {
-        const headers = ['Event Name', 'Club/Chapter', 'Collaborating Club', 'Type', 'Status', 'Start Date', 'End Date', 'Capacity', 'Overnight', 'Venue', 'Description', 'POC Name', 'POC Reg No', 'POC Contact', 'Expected Sponsorship', 'Expected Prize Money'];
-        const csvContent = [
-            headers.join(','),
-            ...sortedProposals.map(p => [
-                `"${p.event_name.replace(/"/g, '""')}"`,
-                `"${p.held_by.replace(/"/g, '""')}"`,
-                `"${(p.collaborating_cc || '').replace(/"/g, '""')}"`,
-                p.type,
-                p.status,
-                p.duration.start_date,
-                p.duration.end_date,
-                p.capacity,
-                p.duration.is_overnight ? 'Yes' : 'No',
-                `"${p.preferred_venue.replace(/"/g, '""')}"`,
-                `"${(p.description || '').replace(/"/g, '""')}"`,
-                `"${p.poc.name.replace(/"/g, '""')}"`,
-                `"${p.poc.reg_no.replace(/"/g, '""')}"`,
-                `"${p.poc.contact.replace(/"/g, '""')}"`,
-                p.financials.expected_sponsorship,
-                p.financials.expected_prize_money !== null ? p.financials.expected_prize_money : ''
-            ].join(','))
-        ].join('\n');
+    // Client-side export is limited to current page.
+    // Ideally should fetch ALL for CSV export.
+    const exportToCSV = async () => {
+        try {
+            const accessToken = await getValidAccessToken();
+            // Fetch ALL for export
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/all-submissions?limit=1000`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const data = await response.json();
+            const allProposals = data.data as AdminProposal[];
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'yantra_submissions.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const headers = ['Event Name', 'Club/Chapter', 'Collaborating CC', 'Type', 'Status', 'Start Date', 'End Date', 'Capacity', 'Overnight', 'Venue', 'Description', 'POC Name', 'POC Reg No', 'POC Contact', 'Expected Sponsorship', 'Expected Prize Money'];
+            const csvContent = [
+                headers.join(','),
+                ...allProposals.map(p => [
+                    `"${p.event_name.replace(/"/g, '""')}"`,
+                    `"${p.held_by.replace(/"/g, '""')}"`,
+                    `"${(p.collaborating_cc || '').replace(/"/g, '""')}"`,
+                    p.type,
+                    p.status,
+                    p.duration.start_date,
+                    p.duration.end_date,
+                    p.capacity,
+                    p.duration.is_overnight ? 'Yes' : 'No',
+                    `"${p.preferred_venue.replace(/"/g, '""')}"`,
+                    `"${(p.description || '').replace(/"/g, '""')}"`,
+                    `"${p.poc.name.replace(/"/g, '""')}"`,
+                    `"${p.poc.reg_no.replace(/"/g, '""')}"`,
+                    `"${p.poc.contact.replace(/"/g, '""')}"`,
+                    p.financials.expected_sponsorship,
+                    p.financials.expected_prize_money !== null ? p.financials.expected_prize_money : ''
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'yantra_submissions.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Export failed");
         }
     };
 
@@ -476,6 +500,7 @@ export default function AdminDashboard() {
         setSelectedOvernight('all');
         setSelectedStatus('all');
         setStartDateFilter('');
+        setPagination(prev => ({ ...prev, page: 1 }));
     };
 
     if (loading) {
@@ -524,22 +549,6 @@ export default function AdminDashboard() {
                             <button onClick={() => router.push('/')} className="bg-white text-black border-2 border-black px-4 py-2 text-sm font-bold uppercase hover:bg-gray-100 transition-colors">
                                 Back to Home
                             </button>
-                        </div>
-                    </div>
-
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                        <div className="bg-black text-white p-4 border-2 border-black">
-                            <p className="text-xs font-bold uppercase opacity-70">Total Submissions</p>
-                            <p className="text-3xl font-bold">{stats.total}</p>
-                        </div>
-                        <div className="bg-white text-black p-4 border-2 border-black">
-                            <p className="text-xs font-bold uppercase text-gray-500">Total Capacity</p>
-                            <p className="text-3xl font-bold">{stats.totalCapacity}</p>
-                        </div>
-                        <div className="bg-white text-black p-4 border-2 border-black">
-                            <p className="text-xs font-bold uppercase text-gray-500">Overnight Events</p>
-                            <p className="text-3xl font-bold">{stats.overnightCount}</p>
                         </div>
                     </div>
 
@@ -610,7 +619,7 @@ export default function AdminDashboard() {
                                         className="w-full border-2 border-gray-300 p-2 text-sm focus:border-black focus:outline-none bg-white"
                                     >
                                         <option value="all">All Clubs</option>
-                                        {uniqueClubs.map(club => (
+                                        {clubOptions.map(club => (
                                             <option key={club} value={club}>{club}</option>
                                         ))}
                                     </select>
@@ -653,7 +662,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Data List */}
-                    {sortedProposals.length === 0 ? (
+                    {proposals.length === 0 ? (
                         <div className="text-center py-12 border-2 border-black bg-white">
                             <p className="text-lg font-bold uppercase tracking-wide mb-2">No Results Found</p>
                             <p className="text-gray-500 text-sm">Try adjusting your filters or search query.</p>
@@ -671,7 +680,7 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Rows */}
-                            {sortedProposals.map((proposal, index) => {
+                            {proposals.map((proposal, index) => {
                                 const isExpanded = expandedRows.has(index);
                                 return (
                                     <div key={index} className="border-b border-gray-200 last:border-b-0">
@@ -808,14 +817,30 @@ export default function AdminDashboard() {
                                                                         <p className="text-sm text-gray-800 whitespace-pre-wrap">{proposal.judgement_criteria}</p>
                                                                     </div>
                                                                 )}
+                                                                {proposal.team_size && (
+                                                                    <div>
+                                                                        <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Team Size</h4>
+                                                                        <p className="text-sm text-gray-800">{proposal.team_size}</p>
+                                                                    </div>
+                                                                )}
                                                             </>
                                                         )}
 
-                                                        {proposal.type === 'workshop' && proposal.workshop_outcome && (
-                                                            <div>
-                                                                <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Outcome</h4>
-                                                                <p className="text-sm text-gray-800 whitespace-pre-wrap">{proposal.workshop_outcome}</p>
-                                                            </div>
+                                                        {proposal.type === 'workshop' && (
+                                                            <>
+                                                                {proposal.workshop_outcome && (
+                                                                    <div>
+                                                                        <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Outcome</h4>
+                                                                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{proposal.workshop_outcome}</p>
+                                                                    </div>
+                                                                )}
+                                                                {proposal.workshop_type && (
+                                                                    <div>
+                                                                        <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Workshop Type</h4>
+                                                                        <p className="text-sm text-gray-800">{proposal.workshop_type}</p>
+                                                                    </div>
+                                                                )}
+                                                            </>
                                                         )}
 
                                                         {proposal.type === 'tech_talk' && proposal.speaker_name && (
@@ -826,15 +851,15 @@ export default function AdminDashboard() {
                                                         )}
                                                     </div>
 
-                                                    {/* Right Column */}
+                                                    {/* Right Column: Logistics & Financials */}
                                                     <div className="space-y-4">
-                                                        <div className="bg-white p-4 border border-gray-200">
-                                                            <div className="flex justify-between items-center mb-3 border-b border-gray-200 pb-2">
-                                                                <h4 className="font-bold uppercase text-xs text-black">Full Logistics</h4>
+                                                        <div className="bg-gray-100 p-4 border border-gray-200">
+                                                            <div className="flex justify-between items-center mb-3">
+                                                                <h4 className="font-bold uppercase text-xs text-black">Logistics</h4>
                                                                 {!editingLogistics[proposal.id] ? (
                                                                     <button
-                                                                        onClick={() => setEditingLogistics({ ...editingLogistics, [proposal.id]: true })}
-                                                                        className="text-xs font-bold text-blue-600 hover:underline uppercase"
+                                                                        onClick={() => setEditingLogistics(prev => ({ ...prev, [proposal.id]: true }))}
+                                                                        className="text-xs font-bold text-blue-600 hover:text-blue-800 uppercase"
                                                                     >
                                                                         Edit
                                                                     </button>
@@ -842,23 +867,24 @@ export default function AdminDashboard() {
                                                                     <div className="flex gap-2">
                                                                         <button
                                                                             onClick={() => handleSaveLogistics(proposal.id)}
-                                                                            className="text-xs font-bold text-green-600 hover:underline uppercase"
+                                                                            className="text-xs font-bold text-green-600 hover:text-green-800 uppercase"
                                                                         >
                                                                             Save
                                                                         </button>
                                                                         <button
                                                                             onClick={() => {
-                                                                                const newEditing = { ...editingLogistics };
-                                                                                delete newEditing[proposal.id];
-                                                                                setEditingLogistics(newEditing);
-                                                                                // Reset changes
+                                                                                setEditingLogistics(prev => {
+                                                                                    const newPrev = { ...prev };
+                                                                                    delete newPrev[proposal.id];
+                                                                                    return newPrev;
+                                                                                });
                                                                                 setLogisticsChanges(prev => {
-                                                                                    const newChanges = { ...prev };
-                                                                                    delete newChanges[proposal.id];
-                                                                                    return newChanges;
+                                                                                    const newPrev = { ...prev };
+                                                                                    delete newPrev[proposal.id];
+                                                                                    return newPrev;
                                                                                 });
                                                                             }}
-                                                                            className="text-xs font-bold text-red-600 hover:underline uppercase"
+                                                                            className="text-xs font-bold text-red-600 hover:text-red-800 uppercase"
                                                                         >
                                                                             Cancel
                                                                         </button>
@@ -866,120 +892,92 @@ export default function AdminDashboard() {
                                                                 )}
                                                             </div>
 
-                                                            {editingLogistics[proposal.id] ? (
-                                                                <div className="grid grid-cols-1 gap-3 text-sm">
-                                                                    <div>
-                                                                        <label className="block text-xs text-gray-500 uppercase mb-1">Start Date</label>
-                                                                        <input
-                                                                            type="date"
-                                                                            value={logisticsChanges[proposal.id]?.start_date || proposal.duration.start_date}
-                                                                            onChange={(e) => handleLogisticsChange(proposal.id, 'start_date', e.target.value)}
-                                                                            className="w-full border border-gray-300 p-1 text-sm"
-                                                                        />
-                                                                    </div>
-                                                                    <div>
-                                                                        <label className="block text-xs text-gray-500 uppercase mb-1">Start Time</label>
-                                                                        <input
-                                                                            type="time"
-                                                                            value={logisticsChanges[proposal.id]?.start_time || proposal.duration.start_time}
-                                                                            onChange={(e) => handleLogisticsChange(proposal.id, 'start_time', e.target.value)}
-                                                                            className="w-full border border-gray-300 p-1 text-sm"
-                                                                        />
-                                                                    </div>
-                                                                    <div>
-                                                                        <label className="block text-xs text-gray-500 uppercase mb-1">End Date</label>
-                                                                        <input
-                                                                            type="date"
-                                                                            value={logisticsChanges[proposal.id]?.end_date || proposal.duration.end_date}
-                                                                            onChange={(e) => handleLogisticsChange(proposal.id, 'end_date', e.target.value)}
-                                                                            className="w-full border border-gray-300 p-1 text-sm"
-                                                                        />
-                                                                    </div>
-                                                                    <div>
-                                                                        <label className="block text-xs text-gray-500 uppercase mb-1">End Time</label>
-                                                                        <input
-                                                                            type="time"
-                                                                            value={logisticsChanges[proposal.id]?.end_time || proposal.duration.end_time}
-                                                                            onChange={(e) => handleLogisticsChange(proposal.id, 'end_time', e.target.value)}
-                                                                            className="w-full border border-gray-300 p-1 text-sm"
-                                                                        />
-                                                                    </div>
-                                                                    <div>
-                                                                        <label className="block text-xs text-gray-500 uppercase mb-1">Venue</label>
+                                                            <div className="space-y-3">
+                                                                {/* Start Date */}
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 uppercase">Start</p>
+                                                                    {editingLogistics[proposal.id] ? (
+                                                                        <div className="flex gap-2 mt-1">
+                                                                            <input
+                                                                                type="date"
+                                                                                value={logisticsChanges[proposal.id]?.start_date || proposal.duration.start_date}
+                                                                                onChange={(e) => handleLogisticsChange(proposal.id, 'start_date', e.target.value)}
+                                                                                className="w-full text-xs p-1 border border-gray-300"
+                                                                            />
+                                                                            <input
+                                                                                type="time"
+                                                                                value={logisticsChanges[proposal.id]?.start_time || proposal.duration.start_time}
+                                                                                onChange={(e) => handleLogisticsChange(proposal.id, 'start_time', e.target.value)}
+                                                                                className="w-full text-xs p-1 border border-gray-300"
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-sm font-bold">{formatDate(proposal.duration.start_date)} at {proposal.duration.start_time}</p>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* End Date */}
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 uppercase">End</p>
+                                                                    {editingLogistics[proposal.id] ? (
+                                                                        <div className="flex gap-2 mt-1">
+                                                                            <input
+                                                                                type="date"
+                                                                                value={logisticsChanges[proposal.id]?.end_date || proposal.duration.end_date}
+                                                                                onChange={(e) => handleLogisticsChange(proposal.id, 'end_date', e.target.value)}
+                                                                                className="w-full text-xs p-1 border border-gray-300"
+                                                                            />
+                                                                            <input
+                                                                                type="time"
+                                                                                value={logisticsChanges[proposal.id]?.end_time || proposal.duration.end_time}
+                                                                                onChange={(e) => handleLogisticsChange(proposal.id, 'end_time', e.target.value)}
+                                                                                className="w-full text-xs p-1 border border-gray-300"
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-sm font-bold">{formatDate(proposal.duration.end_date)} at {proposal.duration.end_time}</p>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Venue */}
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500 uppercase">Venue</p>
+                                                                    {editingLogistics[proposal.id] ? (
                                                                         <select
                                                                             value={logisticsChanges[proposal.id]?.venue || proposal.preferred_venue}
                                                                             onChange={(e) => handleLogisticsChange(proposal.id, 'venue', e.target.value)}
-                                                                            className="w-full border border-gray-300 p-1 text-sm"
+                                                                            className="w-full mt-1 text-xs p-1 border border-gray-300"
                                                                         >
-                                                                            {VENUE_OPTIONS.map(opt => (
-                                                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                                            {VENUE_OPTIONS.map(v => (
+                                                                                <option key={v.value} value={v.value}>{v.label}</option>
                                                                             ))}
                                                                         </select>
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                                                    <div>
-                                                                        <p className="text-xs text-gray-500 uppercase">Start</p>
-                                                                        <p className="font-medium">{formatDate(proposal.duration.start_date)} {proposal.duration.start_time}</p>
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="text-xs text-gray-500 uppercase">End</p>
-                                                                        <p className="font-medium">{formatDate(proposal.duration.end_date)} {proposal.duration.end_time}</p>
-                                                                    </div>
-                                                                    <div className="col-span-2">
-                                                                        <p className="text-xs text-gray-500 uppercase">Venue</p>
-                                                                        <p className="font-medium">{proposal.preferred_venue}</p>
-                                                                    </div>
-                                                                    {proposal.team_size && (
-                                                                        <div>
-                                                                            <p className="text-xs text-gray-500 uppercase">Team Size</p>
-                                                                            <p className="font-medium">{proposal.team_size}</p>
-                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-sm font-bold">{proposal.preferred_venue}</p>
                                                                     )}
-                                                                    <div className="col-span-2">
-                                                                        <p className="text-xs text-gray-500 uppercase">Overnight</p>
-                                                                        <p className={`font-bold ${proposal.duration.is_overnight ? 'text-purple-600' : 'text-gray-600'}`}>
-                                                                            {proposal.duration.is_overnight ? 'Yes' : 'No'}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* POC Details */}
-                                                        <div className="bg-white p-4 border border-gray-200">
-                                                            <h4 className="font-bold uppercase text-xs text-black mb-3 border-b border-gray-200 pb-2">Point of Contact</h4>
-                                                            <div className="space-y-2 text-sm">
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 uppercase">Name</p>
-                                                                    <p className="font-medium">{proposal.poc.name}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 uppercase">Registration No.</p>
-                                                                    <p className="font-medium">{proposal.poc.reg_no}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 uppercase">Contact</p>
-                                                                    <p className="font-medium">{proposal.poc.contact}</p>
                                                                 </div>
                                                             </div>
                                                         </div>
 
-                                                        {/* Financials */}
-                                                        <div className="bg-white p-4 border border-gray-200">
-                                                            <h4 className="font-bold uppercase text-xs text-black mb-3 border-b border-gray-200 pb-2">Financials</h4>
-                                                            <div className="space-y-2 text-sm">
+                                                        <div>
+                                                            <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">POC Details</h4>
+                                                            <p className="text-sm text-gray-800">
+                                                                <span className="font-bold">{proposal.poc.name}</span> <br />
+                                                                {proposal.poc.reg_no} | {proposal.poc.contact}
+                                                            </p>
+                                                        </div>
+
+                                                        <div>
+                                                            <h4 className="font-bold uppercase text-xs text-gray-500 mb-1">Financials</h4>
+                                                            <div className="grid grid-cols-2 gap-4">
                                                                 <div>
-                                                                    <p className="text-xs text-gray-500 uppercase">Expected Sponsorship</p>
-                                                                    <p className="font-medium">₹{proposal.financials.expected_sponsorship}</p>
+                                                                    <p className="text-xs text-gray-500">Sponsorship</p>
+                                                                    <p className="text-sm font-bold text-green-700">₹{proposal.financials.expected_sponsorship}</p>
                                                                 </div>
-                                                                {proposal.financials.expected_prize_money !== null && (
-                                                                    <div>
-                                                                        <p className="text-xs text-gray-500 uppercase">Expected Prize Money</p>
-                                                                        <p className="font-medium">₹{proposal.financials.expected_prize_money}</p>
-                                                                    </div>
-                                                                )}
+                                                                <div>
+                                                                    <p className="text-xs text-gray-500">Prize Money</p>
+                                                                    <p className="text-sm font-bold text-blue-700">₹{proposal.financials.expected_prize_money || 0}</p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -991,9 +989,41 @@ export default function AdminDashboard() {
                             })}
                         </div>
                     )}
+
+                    {/* Pagination Controls */}
+                    {pagination.totalPages > 1 && (
+                        <div className="mt-8 flex items-center justify-between border-t-2 border-black pt-4">
+                            <div className="text-sm text-gray-600">
+                                Showing page <span className="font-bold text-black">{pagination.page}</span> of <span className="font-bold text-black">{pagination.totalPages}</span>
+                                <span className="mx-2">|</span>
+                                Total <span className="font-bold text-black">{pagination.total}</span> items
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                                    disabled={pagination.page === 1}
+                                    className={`px-4 py-2 text-sm font-bold uppercase border-2 transition-colors ${pagination.page === 1
+                                        ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                                        : 'border-black text-black hover:bg-black hover:text-white'
+                                        }`}
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.totalPages, prev.page + 1) }))}
+                                    disabled={pagination.page === pagination.totalPages}
+                                    className={`px-4 py-2 text-sm font-bold uppercase border-2 transition-colors ${pagination.page === pagination.totalPages
+                                        ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                                        : 'border-black text-black hover:bg-black hover:text-white'
+                                        }`}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
-
             <Footer />
         </div>
     );

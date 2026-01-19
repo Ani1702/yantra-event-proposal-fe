@@ -17,7 +17,7 @@ export default function UserBar({ email, onSignOut }: UserBarProps) {
         const token = await getValidAccessToken();
         if (!token) return;
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/admin/status`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           },
