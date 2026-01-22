@@ -440,14 +440,13 @@ export default function EditProposal() {
                 ← Back
               </button>
 
-              {/* <button
+              <button
                 type="button"
                 onClick={toggleEditMode}
-                className={`px-3 sm:px-4 py-2 border-2 transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
-                  isEditMode
-                    ? 'border-red-600 bg-red-600 text-white hover:bg-white hover:text-red-600'
-                    : 'border-black bg-black text-white hover:bg-white hover:text-black'
-                }`}
+                className={`px-3 sm:px-4 py-2 border-2 transition-colors font-semibold uppercase tracking-wide text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${isEditMode
+                  ? 'border-red-600 bg-red-600 text-white hover:bg-white hover:text-red-600'
+                  : 'border-black bg-black text-white hover:bg-white hover:text-black'
+                  }`}
               >
                 {isEditMode ? (
                   <>
@@ -462,7 +461,7 @@ export default function EditProposal() {
                     <span className="hidden xs:inline">Edit</span>
                   </>
                 )}
-              </button> */}
+              </button>
             </div>
           </div>
 
@@ -470,8 +469,8 @@ export default function EditProposal() {
           {status.message && (
             <div
               className={`mb-6 p-3 sm:p-4 border-2 ${status.type === 'success'
-                  ? 'bg-green-50 border-green-600 text-green-800'
-                  : 'bg-red-50 border-red-600 text-red-800'
+                ? 'bg-green-50 border-green-600 text-green-800'
+                : 'bg-red-50 border-red-600 text-red-800'
                 }`}
             >
               <p className="text-xs sm:text-sm font-medium">{status.message}</p>
@@ -490,19 +489,11 @@ export default function EditProposal() {
                 {/* Club/Chapter Name */}
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                    Club/Chapter Name <span className="text-red-600">*</span>
+                    Club/Chapter Name <span className="text-gray-500 font-normal"></span>
                   </label>
-                  <CustomSelect
-                    id="cc_name"
-                    options={clubOptions}
-                    value={formData.cc_name}
-                    onChange={(value) => handleSelectChange('cc_name', value)}
-                    placeholder="Select Club/Chapter"
-                    disabled={!isEditMode}
-                  />
-                  {errors.cc_name && (
-                    <p className="mt-1 text-xs text-red-600">{errors.cc_name}</p>
-                  )}
+                  <div className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 bg-gray-50 text-xs sm:text-sm text-gray-700 font-medium">
+                    {formData.cc_name}
+                  </div>
                 </div>
 
                 {/* Event Type */}
@@ -566,21 +557,11 @@ export default function EditProposal() {
 
                   <div>
                     <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      Duration (hours) <span className="text-red-600">*</span>
+                      Duration <span className="text-gray-500 font-normal">(Read-only)</span>
                     </label>
-                    <input
-                      type="number"
-                      name="duration"
-                      value={formData.duration}
-                      onChange={handleChange}
-                      disabled={!isEditMode}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-black text-xs sm:text-sm ${isEditMode ? 'bg-white' : 'bg-gray-100'
-                        }`}
-                      placeholder="Enter duration"
-                    />
-                    {errors.duration && (
-                      <p className="mt-1 text-xs text-red-600">{errors.duration}</p>
-                    )}
+                    <div className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 bg-gray-50 text-xs sm:text-sm text-gray-700 font-medium">
+                      {formData.duration} {formData.duration ? 'hours' : ''}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -588,96 +569,56 @@ export default function EditProposal() {
 
             {/* Event Schedule Section */}
             <div className="bg-white border-2 border-black p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-bold uppercase tracking-wide mb-4 border-b-2 border-black pb-2">
-                Event Schedule
-              </h2>
+              <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-4">
+                <h2 className="text-lg sm:text-xl font-bold uppercase tracking-wide">
+                  Logistics
+                </h2>
+                {isEditMode && (
+                  <span className="text-xs font-bold text-blue-600 uppercase">
+                    Read Only
+                  </span>
+                )}
+              </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Start Date and Time */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      Start Date <span className="text-red-600">*</span>
-                    </label>
-                    <CustomDatePicker
-                      id="event_start_date"
-                      placeholder="Select start date"
-                      value={formData.event_start_date}
-                      onChange={(value) => handleSelectChange('event_start_date', value)}
-                      disabled={!isEditMode}
-                    />
-                    {errors.event_start_date && (
-                      <p className="mt-1 text-xs text-red-600">{errors.event_start_date}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      Start Time <span className="text-red-600">*</span>
-                    </label>
-                    <CustomTimePicker
-                      id="event_start_time"
-                      placeholder="Select start time"
-                      value={formData.event_start_time}
-                      onChange={(value) => handleSelectChange('event_start_time', value)}
-                      disabled={!isEditMode}
-                    />
-                    {errors.event_start_time && (
-                      <p className="mt-1 text-xs text-red-600">{errors.event_start_time}</p>
-                    )}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold uppercase text-gray-500 mb-1">
+                    Start
+                  </h3>
+                  <div className="text-sm sm:text-base font-bold text-black">
+                    {formData.event_start_date ? new Date(formData.event_start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'} at {formData.event_start_time || 'N/A'}
                   </div>
                 </div>
 
                 {/* End Date and Time */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      End Date <span className="text-red-600">*</span>
-                    </label>
-                    <CustomDatePicker
-                      id="event_end_date"
-                      placeholder="Select end date"
-                      value={formData.event_end_date}
-                      onChange={(value) => handleSelectChange('event_end_date', value)}
-                      disabled={!isEditMode}
-                    />
-                    {errors.event_end_date && (
-                      <p className="mt-1 text-xs text-red-600">{errors.event_end_date}</p>
-                    )}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold uppercase text-gray-500 mb-1">
+                    End
+                  </h3>
+                  <div className="text-sm sm:text-base font-bold text-black">
+                    {formData.event_end_date ? new Date(formData.event_end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'} at {formData.event_end_time || 'N/A'}
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                      End Time <span className="text-red-600">*</span>
-                    </label>
-                    <CustomTimePicker
-                      id="event_end_time"
-                      placeholder="Select end time"
-                      value={formData.event_end_time}
-                      onChange={(value) => handleSelectChange('event_end_time', value)}
-                      disabled={!isEditMode}
-                    />
-                    {errors.event_end_time && (
-                      <p className="mt-1 text-xs text-red-600">{errors.event_end_time}</p>
-                    )}
+                {/* Venue */}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold uppercase text-gray-500 mb-1">
+                    Venue
+                  </h3>
+                  <div className="text-sm sm:text-base font-bold text-black">
+                    {formData.preferred_venue || 'N/A'}
                   </div>
                 </div>
 
                 {/* Overnight Event */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="is_overnight"
-                    id="is_overnight"
-                    checked={formData.is_overnight}
-                    onChange={handleChange}
-                    disabled={!isEditMode}
-                    className="w-4 h-4 border-2 border-black"
-                  />
-                  <label htmlFor="is_overnight" className="text-xs sm:text-sm font-semibold uppercase tracking-wide">
-                    Overnight Event
-                  </label>
-                </div>
+                {formData.is_overnight && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="w-2 h-2 rounded-full bg-black"></div>
+                    <span className="text-xs sm:text-sm font-bold uppercase">Overnight Event</span>
+                  </div>
+                )}
+
               </div>
             </div>
 
@@ -797,26 +738,11 @@ export default function EditProposal() {
             {/* Venue and Collaboration Section */}
             <div className="bg-white border-2 border-black p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold uppercase tracking-wide mb-4 border-b-2 border-black pb-2">
-                Venue & Collaboration
+                Collaboration
               </h2>
 
               <div className="space-y-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
-                    Preferred Venue <span className="text-red-600">*</span>
-                  </label>
-                  <CustomSelect
-                    id="preferred_venue"
-                    options={VENUE_OPTIONS}
-                    value={formData.preferred_venue}
-                    onChange={(value) => handleSelectChange('preferred_venue', value)}
-                    placeholder="Select Venue"
-                    disabled={!isEditMode}
-                  />
-                  {errors.preferred_venue && (
-                    <p className="mt-1 text-xs text-red-600">{errors.preferred_venue}</p>
-                  )}
-                </div>
+                {/* Venue - Removed from here as it is now in Logistics */}
 
                 <div>
                   <label className="block text-xs sm:text-sm font-semibold uppercase tracking-wide mb-2">
@@ -1110,13 +1036,13 @@ export default function EditProposal() {
             {/* Submit Button - Only shown in edit mode */}
             {isEditMode && (
               <div className="flex justify-end">
-                {/* <button
+                <button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'UPDATING...' : 'UPDATE PROPOSAL'}
-                </button> */}
+                </button>
               </div>
             )}
           </form>

@@ -43,8 +43,8 @@ interface Proposal {
   submitted_by: string;
   created_at: string;
   updated_at: string;
-  logo_url: string | null;
   status: string;
+  logo_url: string | null;
 }
 
 export default function ViewSubmissions() {
@@ -207,6 +207,15 @@ export default function ViewSubmissions() {
     });
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
+      case 'under_consideration': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -298,24 +307,19 @@ export default function ViewSubmissions() {
                       {/* Header: Title, Tags, Button */}
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                         <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide break-words">
-                              {proposal.event_title}
-                            </h2>
-                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase border-2 ${proposal.status === 'approved' ? 'bg-green-100 text-green-800 border-green-800' :
-                                proposal.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-800' :
-                                  proposal.status === 'under_consideration' ? 'bg-yellow-100 text-yellow-800 border-yellow-800' :
-                                    'bg-gray-100 text-gray-800 border-gray-800'
-                              }`}>
-                              {proposal.status.replace('_', ' ')}
-                            </span>
-                          </div>
+                          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide mb-2 break-words">
+                            {proposal.event_title}
+                          </h2>
                           <div className="flex flex-wrap gap-2 text-xs">
                             <span className="bg-black text-white px-2 py-1 font-bold uppercase">
                               {getEventTypeLabel(proposal.type)}
                             </span>
                             <span className="border-2 border-black px-2 py-1 font-bold uppercase">
                               {proposal.cc_name}
+                            </span>
+                            {/* Status Badge */}
+                            <span className={`border-2 px-2 py-1 font-bold uppercase ${getStatusColor(proposal.status)}`}>
+                              {proposal.status?.replace('_', ' ') || 'Pending'}
                             </span>
                           </div>
                         </div>
