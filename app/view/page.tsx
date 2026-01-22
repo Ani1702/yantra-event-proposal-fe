@@ -44,6 +44,7 @@ interface Proposal {
   created_at: string;
   updated_at: string;
   logo_url: string | null;
+  status: string;
 }
 
 export default function ViewSubmissions() {
@@ -297,9 +298,18 @@ export default function ViewSubmissions() {
                       {/* Header: Title, Tags, Button */}
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                         <div>
-                          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide mb-2 break-words">
-                            {proposal.event_title}
-                          </h2>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide break-words">
+                              {proposal.event_title}
+                            </h2>
+                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase border-2 ${proposal.status === 'approved' ? 'bg-green-100 text-green-800 border-green-800' :
+                                proposal.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-800' :
+                                  proposal.status === 'under_consideration' ? 'bg-yellow-100 text-yellow-800 border-yellow-800' :
+                                    'bg-gray-100 text-gray-800 border-gray-800'
+                              }`}>
+                              {proposal.status.replace('_', ' ')}
+                            </span>
+                          </div>
                           <div className="flex flex-wrap gap-2 text-xs">
                             <span className="bg-black text-white px-2 py-1 font-bold uppercase">
                               {getEventTypeLabel(proposal.type)}
@@ -314,11 +324,7 @@ export default function ViewSubmissions() {
                           onClick={() => handleEdit(proposal.id)}
                           className="shrink-0 bg-white text-black px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          View Details
+                          Edit Details
                         </button>
                       </div>
 
