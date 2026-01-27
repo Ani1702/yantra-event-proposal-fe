@@ -324,22 +324,52 @@ export default function ViewSubmissions() {
                           </div>
                         </div>
 
-                        <button
+                        {/* <button
                           onClick={() => handleEdit(proposal.id)}
                           className="shrink-0 bg-white text-black px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase"
                         >
                           Edit Details
-                        </button>
+                        </button> */}
                       </div>
 
-                      {/* Grid Stats */}
-                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 text-sm mb-4">
-                        <div>
-                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Date & Time</p>
-                          <p className="font-medium truncate">
-                            {formatDate(proposal.event_start_date)} at {proposal.event_start_time}
+                      {/* Event Schedule & Venue */}
+                      <div className="mb-4 p-3 bg-gray-50 border-l-4 border-black">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                          <h3 className="font-bold uppercase text-xs text-black">Event Schedule & Venue</h3>
+                          <p className="text-[10px] font-semibold text-red-600 bg-red-50 px-2 py-1 border border-red-200 rounded">
+                            ⚠ Updated date,time and venue of the event will be reflected on the portal soon.
                           </p>
                         </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
+                          <div>
+                            <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Start Date</p>
+                            <p className="font-medium">
+                              {formatDate(proposal.event_start_date)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">End Date</p>
+                            <p className="font-medium">
+                              {formatDate(proposal.event_end_date)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Start Time</p>
+                            <p className="font-medium">{proposal.event_start_time}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">End Time</p>
+                            <p className="font-medium">{proposal.event_end_time}</p>
+                          </div>
+                          <div>
+                            <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Venue</p>
+                            <p className="font-medium">{proposal.preferred_venue}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Event Details */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
                         <div>
                           <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Duration</p>
                           <p className="font-medium truncate">{proposal.duration} hours</p>
@@ -347,10 +377,6 @@ export default function ViewSubmissions() {
                         <div>
                           <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Capacity</p>
                           <p className="font-medium truncate">{proposal.expected_capacity} participants</p>
-                        </div>
-                        <div>
-                          <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">Venue</p>
-                          <p className="font-medium truncate">{proposal.preferred_venue}</p>
                         </div>
                         <div>
                           <p className="font-bold uppercase text-[10px] text-gray-500 mb-0.5">POC</p>
