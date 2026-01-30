@@ -324,12 +324,7 @@ export default function ViewSubmissions() {
                           </div>
                         </div>
 
-                        <button
-                          onClick={() => handleEdit(proposal.id)}
-                          className="shrink-0 bg-white text-black px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase"
-                        >
-                          Edit Details
-                        </button>
+
                       </div>
 
                       {/* Event Schedule & Venue */}

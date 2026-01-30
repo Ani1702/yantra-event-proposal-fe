@@ -167,12 +167,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto max-w-xs sm:max-w-none">
-                <button
-                  onClick={() => router.push('/form')}
-                  className="w-full sm:w-auto bg-black text-white px-4 sm:px-6 py-3 sm:py-2.5 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap"
-                >
-                  Create Proposal
-                </button>
+
 
                 <button
                   onClick={() => router.push('/view')}
