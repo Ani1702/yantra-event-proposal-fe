@@ -262,12 +262,12 @@ export default function ViewSubmissions() {
               <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-6 px-4">
                 You haven't submitted any proposals yet.
               </p>
-              {/* <button
+              <button
                 onClick={() => router.push('/form')}
                 className="bg-black text-white px-6 py-3 border-2 border-black hover:bg-white hover:text-black transition-colors font-bold uppercase tracking-wide text-xs sm:text-sm"
               >
                 Create Proposal
-              </button> */}
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -324,12 +324,12 @@ export default function ViewSubmissions() {
                           </div>
                         </div>
 
-                        {/* <button
+                        <button
                           onClick={() => handleEdit(proposal.id)}
                           className="shrink-0 bg-white text-black px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase"
                         >
                           Edit Details
-                        </button> */}
+                        </button>
                       </div>
 
                       {/* Event Schedule & Venue */}
