@@ -29,7 +29,7 @@ export default function LogoUploadDialog({ isOpen, onClose, proposalId, onSucces
                 return;
             }
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/upload-logo`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proposal/upload-logo`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

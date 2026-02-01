@@ -286,7 +286,7 @@ export default function ProposalForm() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proposal`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

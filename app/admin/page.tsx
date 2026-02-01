@@ -99,7 +99,7 @@ export default function AdminDashboard() {
 
                 // Check admin status via Backend API
                 const accessToken = await getValidAccessToken();
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/status`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/status`, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     },
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     const fetchClubOptions = async () => {
         try {
             const accessToken = await getValidAccessToken();
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/options`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/options`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                 },
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
             if (selectedOvernight !== 'all') params.append('is_overnight', selectedOvernight);
 
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/all-submissions?${params.toString()}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/all-submissions?${params.toString()}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                 },
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
             setUpdatingStatus(id);
             const accessToken = await getValidAccessToken();
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/proposal/${id}/status`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/proposal/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
 
         try {
             const accessToken = await getValidAccessToken();
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/proposal/${id}/logistics`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/proposal/${id}/logistics`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -447,7 +447,7 @@ export default function AdminDashboard() {
         try {
             const accessToken = await getValidAccessToken();
             // Fetch ALL for export
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/all-submissions?limit=1000`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/all-submissions?limit=1000`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
             const data = await response.json();

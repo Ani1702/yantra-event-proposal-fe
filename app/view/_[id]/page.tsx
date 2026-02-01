@@ -116,7 +116,7 @@ export default function EditProposal() {
         }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/${proposalId}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/proposal/${proposalId}`,
           {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
@@ -357,7 +357,7 @@ export default function EditProposal() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/${proposalId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/proposal/${proposalId}`,
         {
           method: 'PUT',
           headers: {

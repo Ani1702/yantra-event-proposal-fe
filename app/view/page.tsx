@@ -111,7 +111,7 @@ export default function ViewSubmissions() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/my-proposals`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proposal/my-proposals`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -145,7 +145,7 @@ export default function ViewSubmissions() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/proposal/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/proposal/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
